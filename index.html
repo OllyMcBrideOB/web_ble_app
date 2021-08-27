@@ -8,30 +8,31 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <fieldset class="container_connection container">
-        <legend>Connection</legend>
+    <div class="container_connection">
         <button id="btn_connect">Connect with BLE device</button>
         <button id="btn_start" disabled>Start</button>
         <button id="btn_stop" disabled>Stop</button>
-    </fieldset>
-    <br>
+    </div>
     <fieldset class="container_slider container">
         <legend>Slider</legend>
         <input id="slider" type="range" min="1" max="100" value="50" class="class_slider" >
         <label id="label_slider">50</label>
     </fieldset>
-    <br>
     <fieldset class="container_btnstatus container">
         <legend>Button Status</legend>
         <label id="label_btnstatus">Status</label>
     </fieldset>
-    <br>
-    <fieldset class="container_console container">
+    <fieldset class="container_uart container">
         <legend>UART</legend>
-        <input type="text" name="console_rx" id="console_rx" disabled value="From hand">
-        <br>
-        <input type="text" name="console_tx" id="console_tx" placeholder="To hand">
-        <input type="submit" name="btn_enter" id="btn_enter" placeholder="Enter">
+        <input type="text" id="uart_rx" disabled value="From hand">
+        <input type="text" id="uart_tx" placeholder="To hand">
+        <input type="submit" id="btn_uart_enter" value="Enter">
+    </fieldset>
+    <fieldset class="container_console container">
+        <legend>Non-Real-Time</legend>
+        <input type="text" id="request" placeholder="Request">
+        <input type="submit" id="btn_nrt_enter" value="Enter">
+        <input type="text" id="response" disabled value="Response">
     </fieldset>
     
 </body>
