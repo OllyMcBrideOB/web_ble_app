@@ -5,25 +5,34 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web BLE Test</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container_connection">
+    <fieldset class="container_connection container">
+        <legend>Connection</legend>
         <button id="btn_connect">Connect with BLE device</button>
         <button id="btn_start" disabled>Start</button>
         <button id="btn_stop" disabled>Stop</button>
-    </div>
+    </fieldset>
     <br>
-    <div class="container_slider">
+    <fieldset class="container_slider container">
+        <legend>Slider</legend>
         <input id="slider" type="range" min="1" max="100" value="50" class="class_slider" >
         <label id="label_slider">50</label>
-    </div>
+    </fieldset>
     <br>
-    <form class="container_console">
+    <fieldset class="container_btnstatus container">
+        <legend>Button Status</legend>
+        <label id="label_btnstatus">Status</label>
+    </fieldset>
+    <br>
+    <fieldset class="container_console container">
+        <legend>UART</legend>
         <input type="text" name="console_rx" id="console_rx" disabled value="From hand">
         <br>
         <input type="text" name="console_tx" id="console_tx" placeholder="To hand">
         <input type="submit" name="btn_enter" id="btn_enter" placeholder="Enter">
-    </form>
+    </fieldset>
     
 </body>
 <script src="index.js"></script>
