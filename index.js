@@ -50,6 +50,14 @@ var bluetoothDeviceDetected;
         writeToUART(document.getElementById("uart_tx").value);
     })
 
+    document.getElementById("btn_uart_clear").addEventListener("click", function(event) {
+        document.getElementById("uart_rx").innerHTML = "";
+    })
+
+    // document.getElementById("uart_tx").addEventListener("input", function(event) {
+    //     document.getElementById("uart_rx").innerHTML += this.value;
+    // })
+
     function isWebBLEAvailable() {
         if (!navigator.bluetooth) {
             console.log("Web Bluetooth is not available!");
@@ -176,6 +184,10 @@ function connectGATT() {
     })
 }
 
+function ab2str(buf) {
+    return String.fromCharCode.apply(null, new Uint8Array(buf));
+  }
+
 function str2ab(str) {
     var buf = new ArrayBuffer(str.length);
     var bufView = new Uint8Array(buf);
@@ -195,10 +207,10 @@ function onRTButtonStatusChange(event) {
 }
 
 function onUARTReceived(event) {
-    let val = event.target.value;
-    var now = new Date();
-    console.log("> " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() + " onUARTTxChange is " + val)
-    document.getElementById("uart_rx").value = val;
+    // let val = ab2str(event.target.value);       // ArrayBuffer
+    let val = event.target.value.toString();
+    console.log("UARTrx> '" + val + "'")
+    document.getElementById("uart_rx").innerHTML += val;
 }
 
 function writeToUART(value) {
