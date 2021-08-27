@@ -2,32 +2,32 @@ var deviceName = "Hero BLE";
 var bluetoothDeviceDetected;
 // var gattCharacteristic;
 
-    let serviceUUIDS = {
-        nonRealTime: "0b0b1007-feed-dead-bee5-0be9b1091c50",                // BLE_UUID_REAL_TIME_SERVICE
-        realTime: "0b0b1008-feed-dead-bee5-0be9b1091c50",                   // BLE_UUID_NON_REAL_TIME_SERVICE
-        UART: "0b0b1006-feed-dead-bee5-0be9b1091c50"                        // BLE_UUID_UART_SERVICE
+    let GATT = {
+        nonRealTime: {
+            UUID: "0b0b1007-feed-dead-bee5-0be9b1091c50",                   // BLE_UUID_REAL_TIME_SERVICE
+            NRTRequest: {
+                UUID: "0b0b2017-feed-dead-bee5-0be9b1091c50",           // BLE_UUID_NRT_REQUEST_CHAR
+            },
+            NRTResponse: {
+                UUID: "0b0b2018-feed-dead-bee5-0be9b1091c50",           // BLE_UUID_NRT_RESPONSE_CHAR
+            }
+        },
+        realTime: {
+            UUID: "0b0b1008-feed-dead-bee5-0be9b1091c50",                   // BLE_UUID_REAL_TIME_SERVICE
+            RTButtonStatus: {
+                UUID: "0b0b201a-feed-dead-bee5-0be9b1091c50",           // BLE_UUID_RT_BUTTON_STATUS_CHAR
+            }
+        },
+        UART: {
+            UUID: "0b0b1006-feed-dead-bee5-0be9b1091c50",                   // BLE_UUID_UART_SERVICE
+            Rx: {
+                UUID: "0b0b2015-feed-dead-bee5-0be9b1091c50",           // BLE_UUID_RX_CHAR
+            },
+            Tx: {
+                UUID: "0b0b2016-feed-dead-bee5-0be9b1091c50"            // BLE_UUID_TX_CHAR
+            }  
+        }
     }
-
-    let characteristics = {
-
-        NRTRequest: {
-            UUID: "0b0b2017-feed-dead-bee5-0be9b1091c50",                 // BLE_UUID_NRT_REQUEST_CHAR
-        },
-        NRTResponse: {
-            UUID: "0b0b2018-feed-dead-bee5-0be9b1091c50",                // BLE_UUID_NRT_RESPONSE_CHAR
-        },
-        RTButtonStatus: {
-            UUID: "0b0b201a-feed-dead-bee5-0be9b1091c50",             // BLE_UUID_RT_BUTTON_STATUS_CHAR
-        },
-        UARTRx: {
-            UUID: "0b0b2015-feed-dead-bee5-0be9b1091c50",                     // BLE_UUID_RX_CHAR
-        },
-        UARTTx: {
-            UUID: "0b0b2016-feed-dead-bee5-0be9b1091c50"                      // BLE_UUID_TX_CHAR
-        }        
-    }
-
-
 
     document.getElementById("btn_connect").addEventListener("click", function() {
         if (isWebBLEAvailable()) { read() }
@@ -44,6 +44,7 @@ var bluetoothDeviceDetected;
     document.getElementById("slider").addEventListener("input", function(event) {
         document.getElementById("label_slider").innerHTML = this.value;
         document.getElementById("console_rx").value = this.value
+        write(GATT.UART.Rx)
         // if (isWebBLEAvailable()) { stop() }
     })
 
@@ -57,7 +58,7 @@ var bluetoothDeviceDetected;
 
     function getDeviceInfo() {
         let options = {
-            optionalServices: [serviceUUIDS.nonRealTime, serviceUUIDS.realTime],
+            optionalServices: [GATT.nonRealTime.UUID, GATT.realTime.UUID],
             filters: [
                 { name: deviceName }
             ]
@@ -76,7 +77,7 @@ var bluetoothDeviceDetected;
         .then(connectGATT)
         .then(_ => {
             console.log("Reading val...");
-            return characteristics.RTButtonStatus.handle.readValue();
+            return GATT.realTime.RTButtonStatus.handle.readValue();
         })
         .catch(error => {
             console.log("Waiting to start reading..." + error);
@@ -91,15 +92,15 @@ var bluetoothDeviceDetected;
         return bluetoothDeviceDetected.gatt.connect()
         .then(server => {
             console.log("Getting GATT Service...");
-            return server.getPrimaryService(serviceUUIDS.realTime);
+            return server.getPrimaryService(GATT.realTime.UUID);
         })
         .then(service => {
             console.log("Getting GATT Characteristic...");
-            return service.getCharacteristic(characteristics.RTButtonStatus.UUID);
+            return service.getCharacteristic(GATT.realTime.RTButtonStatus.UUID);
         })
         .then(characteristic => {
-            characteristics.RTButtonStatus.handle = characteristic;
-            characteristics.RTButtonStatus.handle.addEventListener("characteristicvaluechanged", handleChangedValue);
+            GATT.realTime.RTButtonStatus.handle = characteristic;
+            GATT.realTime.RTButtonStatus.handle.addEventListener("characteristicvaluechanged", handleChangedValue);
             start();
 
             document.getElementById("btn_start").disabled = false;
@@ -107,8 +108,8 @@ var bluetoothDeviceDetected;
         })
     }
 
-    function write(val) {
-
+    function write(characteristic, val_to_write) {
+        return characteristic.handle.writeValue(val_to_write)
     }
 
     function handleChangedValue(event) {
@@ -119,7 +120,7 @@ var bluetoothDeviceDetected;
     }
     
     function start() {
-        characteristics.RTButtonStatus.handle.startNotifications()
+        GATT.realTime.RTButtonStatus.handle.startNotifications()
         .then(_ => {
             console.log("Start reading...");
             document.getElementById("btn_start").disabled = true;
@@ -131,7 +132,7 @@ var bluetoothDeviceDetected;
     }
 
     function stop() {
-        characteristics.RTButtonStatus.handle.stopNotifications()
+        GATT.realTime.RTButtonStatus.handle.stopNotifications()
         .then(_ => {
             console.log("Stop reading...");
             document.getElementById("btn_start").disabled = false;
