@@ -54,9 +54,14 @@ var bluetoothDeviceDetected;
         document.getElementById("uart_rx").innerHTML = "";
     })
 
-    // document.getElementById("uart_tx").addEventListener("input", function(event) {
-    //     document.getElementById("uart_rx").innerHTML += this.value;
-    // })
+    document.getElementById("uart_tx").addEventListener("keyup", function(event) {
+        // Number 13 is the "Enter" key on the keyboard
+        if (event.keyCode === 13) {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            writeToUART(document.getElementById("uart_tx").value);
+        }
+    });
 
     function isWebBLEAvailable() {
         if (!navigator.bluetooth) {
@@ -185,8 +190,9 @@ function connectGATT() {
 }
 
 function ab2str(buf) {
-    return String.fromCharCode.apply(null, new Uint8Array(buf));
-  }
+    var enc = new TextDecoder("utf-8");
+    return enc.decode(buf);    
+}
 
 function str2ab(str) {
     var buf = new ArrayBuffer(str.length);
@@ -207,10 +213,13 @@ function onRTButtonStatusChange(event) {
 }
 
 function onUARTReceived(event) {
-    // let val = ab2str(event.target.value);       // ArrayBuffer
-    let val = event.target.value.toString();
+    // decode from ArrayBuffer to UTF-8 String
+    let val = ab2str(event.target.value);       // ArrayBuffer
     console.log("UARTrx> '" + val + "'")
-    document.getElementById("uart_rx").innerHTML += val;
+    // document.getElementById("uart_rx").innerHTML += val;
+    let uart_rx_div = document.getElementById("uart_rx");
+    uart_rx_div.innerHTML += val;
+    uart_rx_div.scrollTop = uart_rx_div.scrollHeight;
 }
 
 function writeToUART(value) {
