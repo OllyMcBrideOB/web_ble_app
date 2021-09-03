@@ -7,10 +7,10 @@
     width: 300px
 }
 
-.terminal {
+.uart_terminal {
     border: 1px solid gray;
-    width: 300px;
-    height: 350px;
+    width: 400px;
+    height: 400px;
     word-wrap:break-word;
     overflow-y: scroll;
 }

@@ -52,6 +52,7 @@ var bluetoothDeviceDetected;
 
     document.getElementById("btn_uart_clear").addEventListener("click", function(event) {
         document.getElementById("uart_rx").innerHTML = "";
+        document.getElementById("uart_tx").value = "";
     })
 
     document.getElementById("uart_tx").addEventListener("keyup", function(event) {
@@ -218,7 +219,8 @@ function onUARTReceived(event) {
     console.log("UARTrx> '" + val + "'")
     // document.getElementById("uart_rx").innerHTML += val;
     let uart_rx_div = document.getElementById("uart_rx");
-    uart_rx_div.innerHTML += val;
+    // uart_rx_div.innerHTML += val;
+    uart_rx_div.innerHTML += "<pre>" + val + "</pre>";          // preserve \n char
     uart_rx_div.scrollTop = uart_rx_div.scrollHeight;
 }
 
