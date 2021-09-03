@@ -41,9 +41,11 @@ var bluetoothDeviceDetected;
         if (isWebBLEAvailable()) { stop() }
     })
 
-    document.getElementById("slider").addEventListener("input", function(event) {
+    // document.getElementById("slider").addEventListener("input", function(event) {
+    document.getElementById("slider").addEventListener("mouseup", function(event) {
         document.getElementById("label_slider").innerHTML = this.value;
-        if (isWebBLEAvailable()) { write(GATT.UART.Rx) }
+        // setGripPos(this.value);
+        if (isWebBLEAvailable()) { setGripPos(this.value) }
     })
 
     document.getElementById("btn_uart_enter").addEventListener("click", function(event) {
@@ -205,7 +207,8 @@ function str2ab(str) {
   }
 
 function write(characteristic, val_to_write) {
-    return characteristic.handle.writeValue(str2ab(val_to_write))       // ArrayBuffer
+    // return characteristic.handle.writeValue(str2ab(val_to_write))       // ArrayBuffer
+    return characteristic.handle.writeValueWithoutResponse(str2ab(val_to_write))       // ArrayBuffer
 }
 
 function onRTButtonStatusChange(event) {
@@ -217,9 +220,7 @@ function onUARTReceived(event) {
     // decode from ArrayBuffer to UTF-8 String
     let val = ab2str(event.target.value);       // ArrayBuffer
     console.log("UARTrx> '" + val + "'")
-    // document.getElementById("uart_rx").innerHTML += val;
     let uart_rx_div = document.getElementById("uart_rx");
-    // uart_rx_div.innerHTML += val;
     uart_rx_div.innerHTML += "<pre>" + val + "</pre>";          // preserve \n char
     uart_rx_div.scrollTop = uart_rx_div.scrollHeight;
 }
@@ -236,6 +237,32 @@ function writeToUART(value) {
     }
 }
 
+function setGripPos(pos)
+{
+    // let cmd = [0x38, 0x00];
+    // let payload = [Number(pos), 0xFF];      // pos, speed
+    // let payload_len = [payload.length, 0x00];
+    // let msg_len = cmd.length + payload_len.length + payload.length;
+
+    // let buf = new ArrayBuffer(msg_len);
+    let buf = new ArrayBuffer(6);
+    let msg = new Uint8Array(buf);
+    // msg = cmd.concat(payload_len, payload);
+    msg = Uint8Array.of(0x38, 0x00, 0x02, 0x00, Number(pos), 0xFF);
+
+    // let msg = new Uint8Array(msg_len);
+    // msg = cmd.concat(payload_len, payload);
+    // let buf = new ArrayBufferView(msg);
+
+    // let buf = new ArrayBuffer(msg_len);
+    // let msg = new Uint8Array(buf);
+    // msg = cmd.concat(payload_len, payload);
+
+        
+    // GATT.nonRealTime.NRTRequest.handle.writeValueWithoutResponse(buf);
+    GATT.nonRealTime.NRTRequest.handle.writeValueWithoutResponse(msg);
+}
+
 function onNRTResponse(event) {
     let val = event.target.value;
     var now = new Date();
@@ -247,7 +274,7 @@ function start() {
     GATT.realTime.RTButtonStatus.handle.startNotifications()
     GATT.UART.Tx.handle.startNotifications()
     .then(_ => {
-        console.log("Start reading...");
+        console.log("Connected");
         document.getElementById("btn_start").disabled = true;
         document.getElementById("btn_stop").disabled = false;
     })
