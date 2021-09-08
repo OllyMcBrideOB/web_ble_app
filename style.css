@@ -4,7 +4,7 @@
     border: 1px solid gray;
     border-radius: 3px;
     box-shadow: 2px 2px rgba(128, 128, 128, 0.226);
-    width: 300px
+    width: 400px
 }
 
 .uart_terminal {
@@ -13,4 +13,53 @@
     height: 400px;
     word-wrap:break-word;
     overflow-y: scroll;
+}
+
+#all_sliders
+{
+    display: inline-block;
+}
+
+.container_grip_slider{
+    width: 20px;
+}
+
+.container_finger_slider{
+    padding: 10px;
+}
+
+.container_slider_group
+{
+    display: inline-block;
+    padding: 10px;
+    margin: 0px 22px;
+}
+
+#grip_slider_group {
+    width: 50px;
+    /* margin: 10px 0px 10px 40px; */
+}
+
+#finger_slider_group {
+    width: 220px;
+    margin-left: 10px;
+}
+
+.container_slider_and_label {
+    margin: 5px;
+    width: 40px;
+    display: inline-block;
+}
+
+.class_slider {
+    writing-mode: bt-lr; 
+    -webkit-appearance: slider-vertical; 
+    width: 7px;
+    height: 175px;
+    padding: 0 15px;
+}
+
+.label_slider {
+    position: relative;
+    left: 12px;
 }

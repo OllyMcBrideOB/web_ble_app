@@ -13,10 +13,34 @@
         <button id="btn_start" disabled>Start</button>
         <button id="btn_stop" disabled>Stop</button>
     </div>
-    <fieldset class="container_slider container">
-        <legend>Slider</legend>
-        <input id="slider" type="range" min="1" max="100" value="50" class="class_slider" >
-        <label id="label_slider">50</label>
+    <fieldset id="all_sliders" class="container">
+        <legend>Sliders</legend>
+        <fieldset id="grip_slider_group" class="container_slider_group container">
+            <legend>Grip</legend>
+            <div class="container_slider_and_label">
+                <input id="slider_grip" type="range" min="1" max="100" value="50" class="class_slider" >
+                <label id="label_grip_slider" class="label_slider">50</label>
+            </div>
+        </fieldset>
+        <fieldset id="finger_slider_group" class="container_slider_group container">
+            <legend>Finger Pos</legend>
+                <div class="container_slider_and_label">
+                    <input id="slider_finger0" type="range" min="1" max="100" value="50" class="class_slider" >
+                    <label id="label_finger0_slider" class="label_slider">50</label>
+                </div>               
+                <div class="container_slider_and_label">
+                    <input id="slider_finger1" type="range" min="1" max="100" value="50" class="class_slider" >
+                    <label id="label_finger1_slider" class="label_slider">50</label>
+                </div>
+                <div class="container_slider_and_label">
+                    <input id="slider_finger2" type="range" min="1" max="100" value="50" class="class_slider" >
+                    <label id="label_finger2_slider" class="label_slider">50</label>
+                </div>
+                <div class="container_slider_and_label">
+                    <input id="slider_finger3" type="range" min="1" max="100" value="50" class="class_slider" >
+                    <label id="label_finger3_slider" class="label_slider">50</label>
+                </div>
+        </fieldset>
     </fieldset>
     <fieldset class="container_btnstatus container">
         <legend>Button Status</legend>

@@ -41,11 +41,29 @@ var bluetoothDeviceDetected;
         if (isWebBLEAvailable()) { stop() }
     })
 
-    // document.getElementById("slider").addEventListener("input", function(event) {
-    document.getElementById("slider").addEventListener("mouseup", function(event) {
-        document.getElementById("label_slider").innerHTML = this.value;
-        // setGripPos(this.value);
+    document.getElementById("slider_grip").addEventListener("mouseup", function(event) {
+        document.getElementById("label_grip_slider").innerHTML = this.value;
         if (isWebBLEAvailable()) { setGripPos(this.value) }
+    })
+
+    document.getElementById("slider_finger0").addEventListener("mouseup", function(event) {
+        document.getElementById("label_finger0_slider").innerHTML = this.value;
+        if (isWebBLEAvailable()) { setFingerPos(0, this.value) }
+    })
+
+    document.getElementById("slider_finger1").addEventListener("mouseup", function(event) {
+        document.getElementById("label_finger1_slider").innerHTML = this.value;
+        if (isWebBLEAvailable()) { setFingerPos(1, this.value) }
+    })
+
+    document.getElementById("slider_finger2").addEventListener("mouseup", function(event) {
+        document.getElementById("label_finger2_slider").innerHTML = this.value;
+        if (isWebBLEAvailable()) { setFingerPos(2, this.value) }
+    })
+
+    document.getElementById("slider_finger3").addEventListener("mouseup", function(event) {
+        document.getElementById("label_finger3_slider").innerHTML = this.value;
+        if (isWebBLEAvailable()) { setFingerPos(3, this.value) }
     })
 
     document.getElementById("btn_uart_enter").addEventListener("click", function(event) {
@@ -237,30 +255,23 @@ function writeToUART(value) {
     }
 }
 
-function setGripPos(pos)
-{
-    // let cmd = [0x38, 0x00];
-    // let payload = [Number(pos), 0xFF];      // pos, speed
-    // let payload_len = [payload.length, 0x00];
-    // let msg_len = cmd.length + payload_len.length + payload.length;
-
-    // let buf = new ArrayBuffer(msg_len);
+function setGripPos(pos) {
     let buf = new ArrayBuffer(6);
     let msg = new Uint8Array(buf);
-    // msg = cmd.concat(payload_len, payload);
     msg = Uint8Array.of(0x38, 0x00, 0x02, 0x00, Number(pos), 0xFF);
 
-    // let msg = new Uint8Array(msg_len);
-    // msg = cmd.concat(payload_len, payload);
-    // let buf = new ArrayBufferView(msg);
-
-    // let buf = new ArrayBuffer(msg_len);
-    // let msg = new Uint8Array(buf);
-    // msg = cmd.concat(payload_len, payload);
-
-        
-    // GATT.nonRealTime.NRTRequest.handle.writeValueWithoutResponse(buf);
     GATT.nonRealTime.NRTRequest.handle.writeValueWithoutResponse(msg);
+}
+
+function setFingerPos(fNum, pos) {
+    let buf = new ArrayBuffer(6);
+    let msg = new Uint8Array(buf);
+    msg = Uint8Array.of(0x2D, 0x00, 0x05, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+    msg[fNum + 4] = Number(pos);
+
+    GATT.nonRealTime.NRTRequest.handle.writeValueWithoutResponse(msg);
+
+    console.log("setFingerPos(" + fNum + ", " + pos + ")");
 }
 
 function onNRTResponse(event) {
