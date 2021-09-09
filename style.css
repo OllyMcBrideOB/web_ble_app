@@ -18,6 +18,8 @@
 #all_sliders
 {
     display: inline-block;
+    position: absolute;
+    left: 500px;
 }
 
 .container_grip_slider{
@@ -37,7 +39,6 @@
 
 #grip_slider_group {
     width: 50px;
-    /* margin: 10px 0px 10px 40px; */
 }
 
 #finger_slider_group {
@@ -62,4 +63,11 @@
 .label_slider {
     position: relative;
     left: 12px;
+}
+
+
+.container_nrt_commands {
+    position: absolute;
+    left: 500px;
+    top: 350px;
 }
