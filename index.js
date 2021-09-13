@@ -10,6 +10,12 @@ var bluetoothDeviceDetected;
             },
             NRTResponse: {
                 UUID: "0b0b2018-feed-dead-bee5-0be9b1091c50",           // BLE_UUID_NRT_RESPONSE_CHAR
+            },
+            NRTLargeRequest: {
+                UUID: "0b0b201e-feed-dead-bee5-0be9b1091c50",           // BLE_UUID_NRT_LARGE_REQUEST_CHAR
+            },
+            NRTLargeResponse: {
+                UUID: "0b0b2019-feed-dead-bee5-0be9b1091c50",           // BLE_UUID_NRT_LARGE_RESPONSE_CHAR
             }
         },
         realTime: {
@@ -83,6 +89,103 @@ var bluetoothDeviceDetected;
             writeToUART(document.getElementById("uart_tx").value);
         }
     });
+    
+    document.getElementById("s_request_cmd").addEventListener("input", function(event) {
+        document.getElementById("s_request_enter").disabled = (event.target.value.length == 4 ? false : true);
+    });
+
+    document.getElementById("s_request_payload").addEventListener("input", function(event) {
+        let hex_str = Number(event.target.value.length).toString(16).toUpperCase().padStart(4, "0");
+        let correct_endian = hex_str.match(/../g).reverse().join('');
+
+        let len_object = document.getElementById("s_request_len");
+        len_object.style.color = (event.target.value.length > 32) ? "red" : "#545454";
+        len_object.value = correct_endian;
+    });
+
+    document.getElementById("container_commands_standard").addEventListener("keyup", function(event) {
+        // Number 13 is the "Enter" key on the keyboard
+        if (event.keyCode === 13) {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            
+            let cmd = document.getElementById("s_request_cmd").value;
+            let len = document.getElementById("s_request_len").value;
+            let payload = document.getElementById("s_request_payload").value;
+                    
+            writeToNRTRequest(cmd, len, payload);
+        }
+    });
+
+    document.getElementById("s_request_enter").addEventListener("click", function(event) {
+        let cmd = document.getElementById("s_request_cmd").value;
+        let len = document.getElementById("s_request_len").value;
+        let payload = document.getElementById("s_request_payload").value;
+                
+        writeToNRTRequest(cmd, len, payload);
+    })
+
+    document.getElementById("l_request_cmd").addEventListener("input", function(event) {
+        document.getElementById("l_request_enter").disabled = (event.target.value.length == 4 ? false : true);
+    });
+
+    
+    document.getElementById("l_request_packet_num").addEventListener("input", function(event) {
+
+        // THIS IS WRONG!!! this should count the number of bytes, not the number 
+        // characters (i.e. 0x0000 is only 2 bytes long, but is 4 chars long)
+
+        let packet_num_len = Number(event.target.value.length);
+        let payload_len = Number(document.getElementById("l_request_payload").value.length);
+        let calculated_len = packet_num_len + payload_len;
+
+        let hex_str = Number(calculated_len).toString(16).toUpperCase().padStart(4, "0");
+        let correct_endian = hex_str.match(/../g).reverse().join('');
+
+        let len_object = document.getElementById("l_request_len");
+        len_object.style.color = (event.target.value.length > 251) ? "red" : "#545454";
+        len_object.value = correct_endian;
+    });
+
+    document.getElementById("l_request_payload").addEventListener("input", function(event) {
+        // THIS IS WRONG!!! this should count the number of bytes, not the number 
+        // characters (i.e. 0x0000 is only 2 bytes long, but is 4 chars long)
+
+        let packet_num_len = Number(document.getElementById("l_request_packet_num").value.length);
+        let payload_len = Number(event.target.value.length);
+        let calculated_len = packet_num_len + payload_len;
+
+        let hex_str = Number(calculated_len).toString(16).toUpperCase().padStart(4, "0");
+        let correct_endian = hex_str.match(/../g).reverse().join('');
+
+        let len_object = document.getElementById("l_request_len");
+        len_object.style.color = (event.target.value.length > 251) ? "red" : "#545454";
+        len_object.value = correct_endian;
+    });
+
+    document.getElementById("container_commands_large").addEventListener("keyup", function(event) {
+        // Number 13 is the "Enter" key on the keyboard
+        if (event.keyCode === 13) {
+            // Cancel the default action, if needed
+            event.preventDefault();
+
+            let cmd = document.getElementById("l_request_cmd").value;
+            let len = document.getElementById("l_request_len").value;
+            let packet_num = document.getElementById("l_request_packet_num").value;
+            let payload = document.getElementById("l_request_payload").value;
+                    
+            writeToNRTLargeRequest(cmd, len, packet_num, payload);
+        }
+    })
+
+    document.getElementById("l_request_enter").addEventListener("click", function(event) {
+        let cmd = document.getElementById("l_request_cmd").value;
+        let len = document.getElementById("l_request_len").value;
+        let packet_num = document.getElementById("l_request_packet_num").value;
+        let payload = document.getElementById("l_request_payload").value;
+                
+        writeToNRTLargeRequest(cmd, len, packet_num, payload);
+    })
 
     function isWebBLEAvailable() {
         if (!navigator.bluetooth) {
@@ -157,6 +260,23 @@ function connectGATT() {
                 GATT.nonRealTime.NRTResponse.handle.addEventListener("characteristicvaluechanged", onNRTResponse);
             })
         })
+        // discover nonRealTime NRTLargeRequest char
+        .then(() => {
+            return GATT.nonRealTime.handle.getCharacteristic(GATT.nonRealTime.NRTLargeRequest.UUID)
+            // store nonRealTime NRTLargeRequest handle
+            .then(characteristic => {
+                GATT.nonRealTime.NRTLargeRequest.handle = characteristic;
+            })
+        })
+        // discover nonRealTime NRTLargeResponse char
+        .then(() => {
+            return GATT.nonRealTime.handle.getCharacteristic(GATT.nonRealTime.NRTLargeResponse.UUID)
+            // store nonRealTime NRTResponse handle & add event listener to nonRealTime NRTLargeResponse
+            .then(characteristic => {
+                GATT.nonRealTime.NRTLargeResponse.handle = characteristic;
+                GATT.nonRealTime.NRTLargeResponse.handle.addEventListener("characteristicvaluechanged", onNRTLargeResponse);
+            })
+        })
     })
     // discover RT Service
     .then(() => {
@@ -224,7 +344,7 @@ function str2ab(str) {
     return buf;
   }
 
-function write(characteristic, val_to_write) {
+function writeToCharacteristic(characteristic, val_to_write) {
     // return characteristic.handle.writeValue(str2ab(val_to_write))       // ArrayBuffer
     return characteristic.handle.writeValueWithoutResponse(str2ab(val_to_write))       // ArrayBuffer
 }
@@ -237,7 +357,7 @@ function onRTButtonStatusChange(event) {
 function onUARTReceived(event) {
     // decode from ArrayBuffer to UTF-8 String
     let val = ab2str(event.target.value);       // ArrayBuffer
-    console.log("UARTrx> '" + val + "'")
+    // console.log("UARTrx> '" + val + "'")
     let uart_rx_div = document.getElementById("uart_rx");
     uart_rx_div.innerHTML += "<pre>" + val + "</pre>";          // preserve \n char
     uart_rx_div.scrollTop = uart_rx_div.scrollHeight;
@@ -247,7 +367,7 @@ function writeToUART(value) {
     if (bluetoothDeviceDetected)
     {
         console.log("Writing '" + value + "' to UART");
-        write(GATT.UART.Rx, value);
+        writeToCharacteristic(GATT.UART.Rx, value);
     }
     else
     {
@@ -274,14 +394,76 @@ function setFingerPos(fNum, pos) {
     console.log("setFingerPos(" + fNum + ", " + pos + ")");
 }
 
+function writeToNRTRequest(cmd, len, payload) {
+
+    let msg_str = cmd + len + payload;
+
+    console.log("cmd: " + cmd + " len: " + len + " payload: " + payload)
+
+    let buf = new ArrayBuffer(msg_str.length / 2);
+    let msg = new Uint8Array(buf);
+
+    for (var i in msg)
+    {
+        // convert 2-char hex string values to a hex-byte within the msg array
+        msg[i] = parseInt(msg_str.substring((i*2), (i*2)+2), 16);
+    }
+
+    GATT.nonRealTime.NRTRequest.handle.writeValueWithoutResponse(msg);
+}
+
 function onNRTResponse(event) {
-    let val = event.target.value;
-    var now = new Date();
-    console.log("> " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() + " onNRTResponse is " + val)
-    document.getElementById("uart_rx").value = val;
+    let msg = new Uint8Array(event.target.value.buffer);
+    var val = ""
+    for (var i in msg)
+    {
+        val += msg[i].toString(16).padStart(2, "0");
+    }
+    console.log("onNRTResponse '" + val + "'")
+
+    document.getElementById("s_response_cmd").value = val.substring(0, 4);
+    document.getElementById("s_response_len").value = val.substring(4, 8);
+    document.getElementById("s_response_payload").value = val.substring(8);
+}
+
+function writeToNRTLargeRequest(cmd, len, packet_num, payload) {
+
+    let msg_str = cmd + len + packet_num + payload;
+
+    console.log("cmd: " + cmd + " len: " + len + " packet_num: " + packet_num + " payload: " + payload)
+
+    let buf = new ArrayBuffer(msg_str.length / 2);
+    let msg = new Uint8Array(buf);
+
+    for (var i in msg)
+    {
+        // convert 2-char hex string values to a hex-byte within the msg array
+        msg[i] = parseInt(msg_str.substring((i*2), (i*2)+2), 16);
+    }
+
+    GATT.nonRealTime.NRTLargeRequest.handle.writeValueWithoutResponse(msg);
+}
+
+function onNRTLargeResponse(event) {
+    let msg = new Uint8Array(event.target.value.buffer);
+    var val = ""
+    for (var i in msg)
+    {
+        val += msg[i].toString(16).padStart(2, "0");
+    }
+
+    document.getElementById("l_response_cmd").value = val.substring(0, 4);
+    document.getElementById("l_response_len").value = val.substring(4, 8);
+    document.getElementById("l_response_packet_num").value = val.substring(8, 12);
+    document.getElementById("l_response_payload").value = val.substring(12);
+
+    // var now = new Date();
+    // document.getElementById("uart_rx").value = val;
 }
 
 function start() {
+    GATT.nonRealTime.NRTResponse.handle.startNotifications()
+    GATT.nonRealTime.NRTLargeResponse.handle.startNotifications()
     GATT.realTime.RTButtonStatus.handle.startNotifications()
     GATT.UART.Tx.handle.startNotifications()
     .then(_ => {

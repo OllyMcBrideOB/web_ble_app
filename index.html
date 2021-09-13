@@ -56,11 +56,44 @@
         <input type="submit" id="btn_uart_enter" value="Enter">
         <input type="submit" id="btn_uart_clear" value="Clear">
     </fieldset>
-    <fieldset class="container_nrt_commands container">
+    <fieldset id="nrt_commands" class="container">
         <legend>Non-Real-Time</legend>
-        <input type="text" id="request" placeholder="Request">
-        <input type="submit" id="btn_nrt_enter" value="Enter">
-        <input type="text" id="response" disabled value="Response">
+        <fieldset id="container_commands_standard" class="container_commands container">
+            <legend>Standard</legend>
+            <div>
+                <label class="label_0x">0x</label>
+                <input type="text" id="s_request_cmd" class="input_cmd" placeholder="Cmd" value="0800">
+                <input type="text" id="s_request_len" class="input_len" disabled value="0000">
+                <input type="text" id="s_request_payload" class="input_payload" placeholder="Payload" value="">
+                <input type="submit" id="s_request_enter" class="btn_enter_request" value="Enter">
+            </div>
+            <div>
+                <label class="label_0x">0x</label>
+                <input type="text" id="s_response_cmd" class="input_cmd" disabled placeholder="Cmd">
+                <input type="text" id="s_response_len" class="input_len" disabled placeholder="Len">
+                <input type="text" id="s_response_payload" class="input_payload" disabled placeholder="Payload">
+            </div>
+        </fieldset>
+        
+        <fieldset id="container_commands_large" class="container_commands container">
+            <legend>Large</legend>
+            <div>
+                <label class="label_0x">0x</label>
+                <input type="text" id="l_request_cmd" class="input_cmd" placeholder="Cmd">
+                <input type="text" id="l_request_len" class="input_len" disabled value="0400">
+                <input type="text" id="l_request_packet_num" class="input_packet_num" value="0000" placeholder="Packet Number">
+                <input type="text" id="l_request_payload" class="input_large_payload" placeholder="Payload">
+                <input type="submit" id="l_request_enter" class="btn_enter_request" disabled value="Enter">
+            </div>
+            <div>
+                <label class="label_0x">0x</label>
+                <input type="text" id="l_response_cmd" class="input_cmd" disabled placeholder="Cmd">
+                <input type="text" id="l_response_len" class="input_len" disabled placeholder="Len">
+                <input type="text" id="l_response_packet_num" class="input_packet_num" disabled placeholder="Packet Number">
+                <input type="text" id="l_response_payload" class="input_large_payload" disabled placeholder="Payload">
+            </div>
+        </fieldset>
+
     </fieldset>
     
 </body>

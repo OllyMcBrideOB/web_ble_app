@@ -66,8 +66,32 @@
 }
 
 
-.container_nrt_commands {
+#nrt_commands {
     position: absolute;
     left: 500px;
     top: 350px;
+}
+
+.container_commands {
+    margin: 10px;
+}
+
+.input_cmd {
+    width: 30px;
+}
+
+.input_len {
+    width: 30px;
+}
+
+.input_packet_num {
+    width: 30px;
+}
+
+.input_payload {
+    width: 230px;
+}
+
+.input_large_payload {
+    width: 190px;
 }
