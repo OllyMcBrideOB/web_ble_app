@@ -1,0 +1,70 @@
+/**< Defaults */
+
+button,input[type=submit] {
+    border: 1px solid gray;
+    border-radius: 3px;
+}
+
+
+/* Header */
+
+header {
+    background-color: rgb(219, 222, 223);
+    margin-bottom: 20px;
+}
+
+header div {
+    padding: 10px;
+}
+
+header label {
+    padding-left: 20px;
+}
+
+#btn_connect {
+    width: 90px;
+    height: 30px;
+    background-color: rgb(174, 214, 255);
+}
+
+
+/* Card */
+
+.card {
+    max-width: 500px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    box-shadow: 2px 2px rgba(128, 128, 128, 0.226);
+}
+
+/* Command Response */
+
+.cmd_responses_terminal {
+    border: 1px solid gray;
+    height: 200px;
+    word-wrap:break-word;
+    overflow-y: scroll;
+}
+
+/* Command Request */
+
+.container_requests {
+    display: flex;
+    margin-top: 8px;
+}
+
+.label_0x {
+    padding-right: 4px;
+}
+
+.cmd_field,.len_field {
+    width: 30px
+}
+
+.payload_field {
+    flex-grow: 1;
+}
+
+.btn_enter_request {
+    margin-left: 4px;
+}

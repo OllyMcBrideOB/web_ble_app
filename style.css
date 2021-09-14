@@ -7,6 +7,8 @@
     width: 400px
 }
 
+/**< UART Terminal */
+
 .uart_terminal {
     border: 1px solid gray;
     width: 400px;
@@ -14,6 +16,8 @@
     word-wrap:break-word;
     overflow-y: scroll;
 }
+
+/**< Sliders */
 
 #all_sliders
 {
@@ -65,6 +69,7 @@
     left: 12px;
 }
 
+/**< NRT Commands */
 
 #nrt_commands {
     position: absolute;
@@ -95,3 +100,4 @@
 .input_large_payload {
     width: 190px;
 }
+

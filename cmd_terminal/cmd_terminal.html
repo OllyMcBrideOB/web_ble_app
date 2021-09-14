@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web BLE - Command Terminal</title>
+    <link rel="stylesheet" href="cmd_terminal.css">
+</head>
+<header>
+    <div>
+        <button id="btn_connect">Connect</button>
+        <label>Connected Device:</label>
+        <label id="label_dev">None</label>
+    </div>
+</header>
+<body>
+    <fieldset id="card_commands" class="card">
+        <legend>Commands</legend>
+        <div class="cmd_responses_terminal">
+            <label id="label_cmd_responses"></label>
+        </div>
+        <div id="cmd_requests">
+            <div id="requests_small" class="container_requests">
+                <label class="label_0x">0x</label>
+                <input type="text" id="s_request_cmd" class="cmd_field" placeholder="Cmd" value="0800">
+                <input type="text" id="s_request_len" class="len_field" disabled value="0000">
+                <input type="text" id="s_request_payload" class="payload_field" placeholder="Payload" value="">
+                <input type="submit" id="s_request_enter" class="btn_enter_request" value="Enter">
+            </div>
+            <div id="requests_large" class="container_requests">
+                <label class="label_0x">0x</label>
+                <input type="text" id="l_request_cmd" class="cmd_field" placeholder="Cmd">
+                <input type="text" id="l_request_len" class="len_field" disabled value="0400">
+                <input type="text" id="l_request_packet_num" class="len_field" value="0000" placeholder="Packet Number">
+                <input type="text" id="l_request_payload" class="payload_field" placeholder="Payload">
+                <input type="submit" id="l_request_enter" class="btn_enter_request" value="Enter">
+            </div>
+        </div>
+    </fieldset>
+    
+</body>
+<script src="index.js"></script>
+
+</html>
