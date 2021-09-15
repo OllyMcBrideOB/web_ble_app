@@ -9,7 +9,7 @@ button,input[type=submit] {
 /* Header */
 
 header {
-    background-color: rgb(219, 222, 223);
+    background-color: rgba(219, 222, 223, 0.384);
     margin-bottom: 20px;
 }
 
@@ -24,7 +24,8 @@ header label {
 #btn_connect {
     width: 90px;
     height: 30px;
-    background-color: rgb(174, 214, 255);
+    background-color: rgba(161, 158, 158, 0.692);
+    border-style: none;
 }
 
 
