@@ -41,25 +41,17 @@ document.getElementById("btn_connect").addEventListener("click", function() {
     }
 })
 
-/**< Return true if str has the correct number of digits and is a valid hex string (ignore 0x) */
-function isValidHex(str, expected_len) {
-    if (str.length == expected_len)
-    {
-        if (str.match(/[0-9a-fA-F]{4}/))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 /**< If the Standard Request Cmd is valid, enable the Enter button, else disable it */
 document.getElementById("s_request_cmd").addEventListener("input", function(event) {
-    document.getElementById("s_request_enter").disabled = !isValidHex(event.target.value, 4);
+    document.getElementById("s_request_enter").disabled = !isValidHexChars(event.target.value, 4);
 });
 
 /**< If the Large Request Cmd is valid, enable the Enter button, else disable it */
 document.getElementById("l_request_cmd").addEventListener("input", function(event) {
-    document.getElementById("l_request_enter").disabled = !isValidHex(event.target.value, 4);
+    document.getElementById("l_request_enter").disabled = !isValidHexChars(event.target.value, 4);
 });
+
+
+
+// DEBUG - 
+GATT.GATTtable.NRTservice.NRTRequest.write("hello");
