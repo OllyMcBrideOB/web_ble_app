@@ -7,13 +7,13 @@ class GATTmanager {
         this.connected = false;
 
         // define the GATT table layout
-        this.addService("NRTservice", new OB_UUID("1007"), this.isConnected).
+        this.addService("NRTservice", new OB_UUID("1007")).
                 addCharacteristic("NRTRequest", new OB_UUID("2017")).
                 addCharacteristic("NRTResponse", new OB_UUID("2018")).
                 addCharacteristic("NRTLargeRequest", new OB_UUID("201e")).
                 addCharacteristic("NRTLargeResponse", new OB_UUID("2019"));
 
-        this.addService("RTservice", new OB_UUID("1008"), this.isConnected).
+        this.addService("RTservice", new OB_UUID("1008")).
                 addCharacteristic("RTButtonStatus", new OB_UUID("201a"));
 
 
@@ -34,7 +34,7 @@ class GATTmanager {
 
     /**< Assign a service to the GATT table */
     addService(name, service_uuid) {
-        return this.GATTtable[name] = new GATTservice(service_uuid);
+        return this.GATTtable[name] = new GATTservice(name, service_uuid, this);
     }
 
 
@@ -114,12 +114,14 @@ class GATTmanager {
 
 class GATTitem {
     /**
+     * @param {string} name Name of the GATT item
      * @param {string} long_uuid Long UUID of the GATT item
-     * @param {func} isConnected Reference to the GATTManager.isConnected function
+     * @param {GATTmanager} gatt_manager Reference to the GATTManager
      */
-    constructor(long_uuid, isConnected) {
+    constructor(name, long_uuid, gatt_manager) {
+        this.name = name;
         this.UUID = long_uuid;
-        this.isConnected = isConnected
+        this.gatt_manager = gatt_manager
         this.handle;
     }
 }
@@ -127,7 +129,7 @@ class GATTitem {
 class GATTservice extends GATTitem {
     /**< Assign a characteristic to this service */
     addCharacteristic(name, characteristic_uuid) {
-        this[name] = new GATTcharacteristic(characteristic_uuid, this.isConnected);
+        this[name] = new GATTcharacteristic(name, characteristic_uuid, this.gatt_manager);
 
         return this;    // allow this function to be chainable, to add multiple chars
     }
@@ -137,23 +139,23 @@ class GATTservice extends GATTitem {
 class GATTcharacteristic extends GATTitem {
     /*< Read the current value of the characteristic */
     read() {
-        if (super.isConnected)
+        if (this.gatt_manager.isConnected())
         {
             // TODO, read the current value of the characteristic
         }
         // else if we're not currently connected to a BLE peripheral
         else
         {
-            console.log("ERROR - Unable to write val to characteristic as we are not connected to a BLE device");
+            console.log("ERROR - Unable to write val to the '%s' characteristic as we are not connected to a BLE device", this.name);
         }
     }
 
     /**< Write a value to the characteristic */
     write(val) {
         // if (GATTitem.protoype.isConnected)
-        if (super.isConnected)
+        if (this.gatt_manager.isConnected())
         {
-            let hexStr = new HexStr();
+            var hexStr = new HexStr();
             switch (typeof val) {
                 case "string":
                     hexStr.fromString(val);
@@ -162,28 +164,30 @@ class GATTcharacteristic extends GATTitem {
                     hexStr.fromArray(val);
                     break;
                 default:
-                    console.log("ERROR - Unable to write val to characteristic as type '%s' is not handled",
-                        typeof val)
+                    console.log("ERROR - Unable to write val to the '%s' characteristic as type '%s' is not handled",
+                        this.name, typeof val)
             }
 
             try {
+                console.log("Write: '" + Array.apply([], hexStr.rawArray).join("-") + "'");
+
                 // TODO, convert val to Uint8Array
-                this.handle.writeValueWithoutResponse(val);
+                this.handle.writeValueWithoutResponse(hexStr.rawArray);
             } catch(error) {
-                console.log("ERROR - Unable to write to GATT item '%s' " + error, this.UUID)
+                console.log("ERROR - Unable to write '%s' to the '%s' characteristic " + error, val.toString(), this.name, this.UUID)
             }
 
         }
         // else if we're not currently connected to a BLE peripheral
         else
         {
-            console.log("ERROR - Unable to write val to characteristic as we are not connected to a BLE device");
+            console.log("ERROR - Unable to write val to the '%s' characteristic as we are not connected to a BLE device", this.name);
         }
     }
 
     /**< Add a callback to call when the characteristic value changes */
     onValueChange(callback) {
-        if (super.isConnected)
+        if (this.gatt_manager.isConnected())
         {
             try {
                 this.handle.addEventListener("characteristicvaluechanged", callback);
@@ -195,7 +199,7 @@ class GATTcharacteristic extends GATTitem {
         // else if we're not currently connected to a BLE peripheral
         else
         {
-            console.log("ERROR - Unable to write val to characteristic as we are not connected to a BLE device");
+            console.log("ERROR - Unable to write val to the '%s' characteristic as we are not connected to a BLE device", this.name);
         }
     }
 }
