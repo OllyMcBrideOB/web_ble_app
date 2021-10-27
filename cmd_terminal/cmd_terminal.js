@@ -10,17 +10,7 @@ document.getElementById("btn_connect").addEventListener("click", function() {
             console.log("Connecting");
             // show the 'Devices to connect to' dialog & try to connect to the selected device
             GATT.connect().then(_ => {
-                // upon successful conneciton, set the device name & change the button to 'Disconnect
-                document.getElementById("label_dev").innerHTML = GATT.deviceDisplayName();
-                document.getElementById("btn_connect").innerHTML = "Disconnect"
-                
-                // DEBUG - subscribe to ButtonStatus & display in terminal
-                GATT.GATTtable.RTservice.RTButtonStatus.onValueChange( function(event) {
-                    document.getElementById("label_cmd_responses").innerHTML += event.target.value.getUint8(0).toString() + "<br>";
-                    let response_label_div = document.getElementById("cmd_responses_terminal");
-                    response_label_div.scrollTop = response_label_div.scrollHeight;
-                })
-
+                onConnectionComplete();
             }).                
             // else if connection failed
             catch(error => {
@@ -53,5 +43,26 @@ document.getElementById("l_request_cmd").addEventListener("input", function(even
 
 
 
-// DEBUG - 
-GATT.GATTtable.NRTservice.NRTRequest.write("hello");
+function onConnectionComplete() {
+
+    // upon successful conneciton, set the device name & change the button to 'Disconnect
+    document.getElementById("label_dev").innerHTML = GATT.deviceDisplayName();
+    document.getElementById("btn_connect").innerHTML = "Disconnect"
+    
+    subscibeToCharacteristics();
+
+}
+
+/** Called after successful connection. Allows characteristics to be subscribed to */
+function subscibeToCharacteristics() {
+
+    // DEBUG - subscribe to ButtonStatus & display in terminal
+    GATT.GATTtable.RTservice.RTButtonStatus.onValueChange( function(event) {
+        document.getElementById("label_cmd_responses").innerHTML += event.target.value.getUint8(0).toString() + "<br>";
+        let response_label_div = document.getElementById("cmd_responses_terminal");
+        response_label_div.scrollTop = response_label_div.scrollHeight;
+    })
+    
+    // DEBUG - 
+    GATT.GATTtable.NRTservice.NRTRequest.write("hello!");
+};
