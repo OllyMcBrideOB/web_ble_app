@@ -14,7 +14,11 @@ document.getElementById("btn_connect").addEventListener("click", function() {
             }).                
             // else if connection failed
             catch(error => {
-                console.log("Connection failed: " + error);
+                 // if the user has not cancelled the Device Selector Window
+                if (error.name != "NotFoundError") {
+                    console.log("Connection error: " + error)
+                }
+
                 // reset the header to known values
                 document.getElementById("label_dev").innerHTML = "None";
                 document.getElementById("btn_connect").innerHTML = "Connect"
