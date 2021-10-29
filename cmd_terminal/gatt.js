@@ -21,8 +21,8 @@ class GATTmanager {
         this.options = {
             optionalServices: [],
             filters: [
-                { name: "Hero BLE" }
-            ]
+                { services: ["0b0b1007-feed-dead-bee5-0be9b1091c50"] }
+            ],
         }
         
         // append the services from the GATT table to the optionalServices to allow them to be interacted wtih
@@ -100,7 +100,7 @@ class GATTmanager {
             this.connected = true;
         } catch(error)
         {
-            console.log("Connection error: " + error)
+            throw error;
         }
     }
     
