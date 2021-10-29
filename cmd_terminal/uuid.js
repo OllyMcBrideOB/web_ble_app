@@ -27,8 +27,8 @@ class UUID {
         if (short_uuid.length == 4) {
             this.short_uuid = short_uuid.toLowerCase()
             this.UUID = this.base_uuid.substring(0, 4) + 
-            this.short_uuid + 
-            this.base_uuid.substring(8);
+                        this.short_uuid + 
+                        this.base_uuid.substring(8);
         }
         else
         {
