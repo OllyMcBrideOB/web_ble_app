@@ -179,24 +179,9 @@ class HexStr
         // this.print();
     }
 
+    /**< Print the raw HexStr byte array */
     print() {
-        // convert the Uint8Array to an Array, then each element to hex characters
-        if (this.rawArray.length > 1) {
-            var hexArrayStr = Array.apply([], this.rawArray).map(dec_val => dec_val.toString(16).toUpperCase().padStart(2, "0")).join("-")
-        }
-        else if (this.rawArray.length == 1) {
-            var hexArrayStr = this.rawArray[0].toString(16).toUpperCase().padStart(2, "0")
-        }
-        else {
-            var hexArrayStr = "-"
-        }
         
-        console.log("rawArray: '%s'", hexArrayStr);
-    }
-
-    
-}
-
 class Message {
     constructor(cmd, payload) {
         this.cmd = new HexStr();
@@ -230,6 +215,7 @@ class Message {
         // full_byte_array.toUint8Array()
         full_byte_array.fromUint8Array([this.cmd.toUint8Array(), this.payload_len.toUint8Array(), this.payload.toUint8Array()]);
         full_byte_array.print();
+        console.log("rawArray: '%s'", this.toString("-"));
     }
 }
 
