@@ -37,13 +37,19 @@ class HexStr
     }
 
     /**< Get the hex array as a string of hex characters
+     * @param charSep   Seperator between chars
      * @returns str     Get the hex array as a string of hex characters (no '0x')
      */
-    toString() {
+    toString(charSep = "") {
         let str = "";
-        for (let i = 0; i < this.rawArray.length; i++)
-        {
-            str += this.rawArray[i].toString(16).padStart(2, "0");
+        for (let i = 0; i < this.rawArray.length; i++) {
+            // convert the byte value to a it's 2-digit hex representation
+            str += this.rawArray[i].toString(16).padStart(2, "0")
+            
+            // add the seperator between hex numbers (don't add sep after last hex number)
+            if (i < this.rawArray.length - 1){
+                str += charSep;
+            }
         }
         return str;
     }
