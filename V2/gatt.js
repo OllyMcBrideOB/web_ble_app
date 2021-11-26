@@ -152,24 +152,32 @@ class GATTcharacteristic extends GATTitem {
 
     /**< Write a value to the characteristic */
     write(val) {
-        // if (GATTitem.protoype.isConnected)
         if (this.gatt_manager.isConnected())
         {
             var hexStr = new HexStr();
-            switch (typeof val) {
-                case "string":
-                    hexStr.fromUTF8String(val);
-                    break;
-                case "Uint8Array":
-                    hexStr.fromArray(val);
-                    break;
-                default:
-                    console.log("ERROR - Unable to write val to the '%s' characteristic as type '%s' is not handled",
-                        this.name, typeof val)
+            
+            // convert the value to a HexStr
+            if (val instanceof HexStr) {
+                hexStr = val;
+            } else if (val instanceof Message) {
+                hexStr = val.toHexStr();
+            } else {
+                switch (typeof val) {
+                    case "string":
+                        hexStr.fromUTF8String(val);
+                        break;
+                    case "Uint8Array":
+                        hexStr.fromArray(val);
+                        break;
+                    default:
+                        console.log("ERROR - Unable to write val to the '%s' characteristic as type '%s' is not handled",
+                            this.name, typeof val)
+                }
             }
 
+            // try to write the HexStr to the characteristic
             try {
-                console.log("Write: '" + Array.apply([], hexStr.rawArray).join("-") + "'");
+                hexStr.print();
 
                 // TODO, convert val to Uint8Array
                 this.handle.writeValueWithoutResponse(hexStr.rawArray);
