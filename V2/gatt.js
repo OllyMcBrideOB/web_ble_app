@@ -135,6 +135,8 @@ class GATTservice extends GATTitem {
     }
 }
 
+/**< Array of callbacks to call upon onValueChange */
+onValueChangeCallbackChain = [];
 
 class GATTcharacteristic extends GATTitem {
     /*< Read the current value of the characteristic */
@@ -193,13 +195,23 @@ class GATTcharacteristic extends GATTitem {
         }
     }
 
-    /**< Add a callback to call when the characteristic value changes */
+    /**
+     * Add a callback to the list of callbacks to call upon receiving a value from the characteristic
+     * @param {function} callback callback to call upon receiving a value from the characteristic
+     */
     onValueChange(callback) {
-        if (this.gatt_manager.isConnected())
-        {
+
+        if (this.gatt_manager.isConnected()) {
             try {
-                this.handle.addEventListener("characteristicvaluechanged", callback);
-                this.handle.startNotifications();
+                // append the callback to the array of callbacks
+                onValueChangeCallbackChain.push(callback);
+
+                // attach the _onValueChangeCallbackChain to the event 
+                // if (this.callbackChain.length == 1) {
+                    this.handle.addEventListener("characteristicvaluechanged", this._onValueChangeCallbackChain);
+                    // this.handle.addEventListener("characteristicvaluechanged", callback);
+                    this.handle.startNotifications();
+                // }
             } catch(error) {
                 console.log("ERROR - Unable to add onValueChange callback to GATT item '%s' " + error, this.UUID)
             }
@@ -208,6 +220,28 @@ class GATTcharacteristic extends GATTitem {
         else
         {
             console.log("ERROR - Unable to write val to the '%s' characteristic as we are not connected to a BLE device", this.name);
+        }
+    }
+
+    /**
+     * Remove a callback to the list of callbacks to call upon receiving a value from the characteristic
+     * @param {function} callback Callback to remove from the event
+     */
+    onValueChangeRemove(callback) {
+        const index = onValueChangeCallbackChain.indexOf(callback);
+        if (index > -1) {
+            onValueChangeCallbackChain.splice(index, 1);
+        }
+    }
+
+    /**
+     * Callback to call each callback within the chain
+     * @param {*} event characteristicvaluechanged event parameters
+     */
+    _onValueChangeCallbackChain(event) {
+        // iterate through the callback chain and call each in turn
+        for (var c of onValueChangeCallbackChain) {
+            c(event);
         }
     }
 }
