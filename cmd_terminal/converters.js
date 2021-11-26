@@ -1,15 +1,5 @@
 
 
-/**
- * TODO
- * 
- * - User input str to Hex array (correct encoding)
- * - 
- * 
- * 
- * 
- */
-
 /**< Return true if str is a valid hex string (e.g. '0x123', '0X1a2B' 'FF')
  * @param str           String to check whether it is a valid hex string
 */
@@ -25,10 +15,12 @@ function isValidHexChars(str, expected_len) {
     return Boolean(str.match("[0-9a-fA-F]{" + expected_len + "}")) && (str.length == expected_len);
 }
 
-
-/**< Stored as a Uint8Array */
+/**< A Uint8Array with converters to/from strings, arrays & numbers */
 class HexStr
 {
+    /**< Construct the array from a hex string
+     * @param hexStr    A string of hex chars
+     */
     constructor(hexStr = "") {
         this.rawArray = new Uint8Array();
 
@@ -36,8 +28,7 @@ class HexStr
         Object.defineProperty(this, 'length', { get: function() { return this.rawArray.length; }});
 
         // if a parameter was passed to the constructor, generate the hex string
-        if (hexStr != "")
-        {
+        if (hexStr != "") {
             this.fromHexString(hexStr);
         }
     }
@@ -67,7 +58,9 @@ class HexStr
         return this.rawArray;
     }
 
-    /**< Create a HexStr from a Uint8Array */
+    /**< Create a HexStr from a Uint8Array 
+     * @param arr       A Uint8Array to copy to the HexStr
+     */
     fromUint8Array(arr) {
         if (arr instanceof Uint8Array) {        // if we just have a single Uint8Array
             this.rawArray = arr;
@@ -83,14 +76,11 @@ class HexStr
             
             this.rawArray = new Uint8Array(total_size);
             let offset = 0;
-            for (var a of arr)
-            {
+            for (var a of arr) {
                 // TODO, ensure a is of the correct type
                 this.rawArray.set(a, offset);
                 offset += a.length;
             }
-
-            // this.print();
         } else {
             console.log("ERROR - Unable to call HexStr::fromUint8Array() as value is of type '%s'", typeof num);
         }
@@ -170,13 +160,9 @@ class HexStr
         this.rawArray = new Uint8Array(str.length);
 
         // convert 2-char hex string values to a hex-byte within the raw array
-        for (var i = 0; i < str.length; i++)
-        {
-            // this.rawArray[i] = parseInt(str.substring(i, i+1), 16);
+        for (var i = 0; i < str.length; i++) {
             this.rawArray[i] = str.charCodeAt(i);
         }
-
-        // this.print();
     }
 
     /**< Print the raw HexStr byte array */
