@@ -158,7 +158,7 @@ class GATTcharacteristic extends GATTitem {
             var hexStr = new HexStr();
             switch (typeof val) {
                 case "string":
-                    hexStr.fromString(val);
+                    hexStr.fromUTF8String(val);
                     break;
                 case "Uint8Array":
                     hexStr.fromArray(val);
