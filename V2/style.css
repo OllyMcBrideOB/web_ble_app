@@ -39,13 +39,12 @@ header label {
     margin-bottom: 20px;
 }
 
-/* Command Response */
-
-#cmd_responses_terminal {
+.scroll_box {
     border: 1px solid gray;
     height: 200px;
     word-wrap:break-word;
     overflow-y: scroll;
+    font-family: monospace;
 }
 
 /* Command Request */
@@ -75,9 +74,22 @@ header label {
 /* File Manager */
 
 #file_viewer {
-    border: 1px solid gray;
-    height: 200px;
-    word-wrap:break-word;
-    overflow-y: scroll;
     margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#file_transfer {
+    margin-top: 15px;
+    
+}
+
+.file_transfer_size_txt {
+    font-family: Arial;
+    font-size: 13.33333px;
+}
+
+#file_transfer_status {
+    max-height: 80px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }

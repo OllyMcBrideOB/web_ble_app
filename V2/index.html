@@ -17,7 +17,7 @@
 <body>
     <fieldset id="card_commands" class="card">
         <legend>Commands</legend>
-        <div id="cmd_responses_terminal">
+        <div id="cmd_responses_terminal" class="scroll_box">
             <label id="label_cmd_responses"></label>
         </div>
         <div id="cmd_requests">
@@ -41,9 +41,20 @@
     <fieldset id="card_file_explorer" class="card">
         <legend>File Manager</legend>
         <label for="myfile">Select a file:</label>
-        <input type="file" id="file" name="file" accept=".bin,.hex,.txt">
-        <div id="file_viewer">
+        <input type="file" id="file_selector" name="file_selector" accept=".bin,.hex,.txt">
+        <div id="file_viewer" class="scroll_box">
             <label id="file_viewer_box"></label>
+        </div>
+        <div id="file_transfer">
+            <label id="file_transfer_label">Transfer the file:</label>
+            <button type="submit", id="file_transfer_start">Start</button>
+            <label id="file_size_transferred" class="file_transfer_size_txt">0</label>
+            <label class="file_transfer_size_txt">/</label>
+            <label id="file_size_total" class="file_transfer_size_txt">0</label>
+            <label class="file_transfer_size_txt">bytes</label>
+            <div id="file_transfer_status" class="scroll_box">
+                <label id="file_transfer_status_box"></label>
+            </div>
         </div>
     </fieldset>
     

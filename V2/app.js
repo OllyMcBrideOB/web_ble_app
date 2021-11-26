@@ -84,7 +84,7 @@ document.getElementById("s_request_enter").addEventListener("click", function(ev
 /**
  * When a file has been selected from the file explorer, print it to the file manager text box
  */
-document.getElementById("file").addEventListener("change", function(event) {
+document.getElementById("file_selector").addEventListener("change", function(event) {
     // if a valid file was selected
     if (this.files.length > 0) {
         // prepare a file reader
@@ -95,6 +95,7 @@ document.getElementById("file").addEventListener("change", function(event) {
             let file_contents = new HexStr();
             file_contents.fromUint8Array(new Uint8Array(reader.result));
             document.getElementById("file_viewer_box").innerHTML = file_contents.toString("-").toUpperCase();
+            document.getElementById("file_size_total").innerHTML = file_contents.length;
         };
 
         // peform the read
