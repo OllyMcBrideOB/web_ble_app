@@ -102,6 +102,16 @@ document.getElementById("file_selector").addEventListener("change", function(eve
     }
 });
 
+document.getElementById("file_transfer_start_btn").addEventListener("click", function(event) {
+    
+    const file_data = [0, 1, 2, 3, 4, 5]
+    const file = new File(file_data, "test_filename.bin");
+    file.length = file_data.length;
+    
+    const f = new FileTransfer;
+    f.start(file);
+});
+
 /**
  * Copy the message command string into the request message classes
  * @param {string} cmd Message command string of hex characters
