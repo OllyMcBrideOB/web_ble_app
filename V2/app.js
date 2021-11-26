@@ -64,20 +64,17 @@ document.getElementById("l_request_payload").addEventListener("input", function(
 
 /**< If the Standard Request 'Enter' button is clicked */
 document.getElementById("s_request_enter").addEventListener("click", function(event) {
-    let terminal_msg = "No BLE Device Connected"
-
     if (GATT.isConnected()) {
         let tx_msg = new Message(document.getElementById("s_request_cmd").value, 
                                 document.getElementById("s_request_payload").value);
         tx_msg.print();
 
-        terminal_msg = "=> " + tx_msg.toString()
-    }
+        GATT.GATTtable.NRTservice.NRTRequest.write(tx_msg);
 
-    // write the message to the Command Terminal component
-    document.getElementById("label_cmd_responses").innerHTML += terminal_msg + "<br>";
-    let response_label_div = document.getElementById("cmd_responses_terminal");
-    response_label_div.scrollTop = response_label_div.scrollHeight;
+        writeToCommandTerminal(tx_msg, "tx")
+    } else {
+        writeToCommandTerminal("No BLE Device Connected")
+    }
 });
 
 /**
@@ -142,28 +139,52 @@ function onConnectionComplete() {
  *  Called after successful connection. Allows characteristics to be subscribed to
  */
 function subscibeToCharacteristics() {
-
-    // // DEBUG - subscribe to ButtonStatus & display in terminal
-    // GATT.GATTtable.RTservice.RTButtonStatus.onValueChange( function(event) {
-    //     document.getElementById("label_cmd_responses").innerHTML += event.target.value.getUint8(0).toString() + "<br>";
-    //     let response_label_div = document.getElementById("cmd_responses_terminal");
-    //     response_label_div.scrollTop = response_label_div.scrollHeight;
-    // })
-    
-    // // DEBUG - 
-    // GATT.GATTtable.NRTservice.NRTRequest.write("hello!");
-    
+   
     // subscribe to the NRT response char
-    GATT.GATTtable.NRTservice.NRTResponse.onValueChange( function(event) {
+    GATT.GATTtable.NRTservice.NRTResponse.onValueChange( function(event) {      
         // convert the ArrayBuffer to a HexStr
-        let rx_hex_str = new HexStr();
-        rx_hex_str.fromUint8Array(new Uint8Array(event.target.value.buffer));
-        // convert the HexStr to a Message
-        let rx_msg = new Message();
-        rx_msg.fromHexStr(rx_hex_str);
-        // write the message to the Command Terminal component
-        document.getElementById("label_cmd_responses").innerHTML += "<= " + rx_msg.toString() + "<br>";
-        let response_label_div = document.getElementById("cmd_responses_terminal");
-        response_label_div.scrollTop = response_label_div.scrollHeight;
+        let rx_hex_str = new HexStr().fromUint8Array(new Uint8Array(event.target.value.buffer));
+        writeToCommandTerminal(rx_hex_str, "rx")
     })
 };
+
+/**
+ * Write a message to the command terminal (including the rx/tx indicator)
+ * @param {val} val A value to write to the command terminal
+ * @param {"tx","rx","none"} tx_rx String to indicate if it is a tx or rx message
+ */
+function writeToCommandTerminal(val, tx_rx) {
+
+    // determine the indicator direction
+    const tx_rx_indicator = (tx_rx == "tx") ? "=> " : (tx_rx == "rx") ? "<= " : ""; 
+    let val_str = "";
+
+    // convert the value to a printable string
+    if (val instanceof HexStr) {
+        // convert the hex_str to a message
+        let msg = new Message().fromHexStr(val);
+
+        val_str = msg.toString("-");
+    } else if (val instanceof Message) {
+        val_str = val.toString();
+    } else {
+        switch (typeof val) {
+            case "string":
+                val_str = val;
+                break;
+            case "Uint8Array":
+                val_str = new HexStr().fromArray(val).toString("-")
+                break;
+            default:
+                console.log("ERROR - Unable to write val to the '%s' characteristic as type '%s' is not handled",
+                    this.name, typeof val)
+        }
+    }
+
+    // write the message to the Command Terminal component
+    document.getElementById("label_cmd_responses").innerHTML += tx_rx_indicator + val_str + "<br>";
+
+    // scroll to the bottom of the terminal
+    let response_label_div = document.getElementById("cmd_responses_terminal");
+    response_label_div.scrollTop = response_label_div.scrollHeight;
+}
