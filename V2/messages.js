@@ -29,6 +29,16 @@ class Message {
                 this.payload.toString("-")
     }
 
+    /**
+     * Get the message as a HexStr
+     * @returns The message as a HexStr
+     */
+    toHexStr() {
+        let full_byte_array = new HexStr();
+        full_byte_array.fromUint8Array([this.cmd.toUint8Array(), this.payload_len.toUint8Array(), this.payload.toUint8Array()]);
+        return full_byte_array;
+    }
+
     /**< Set the message command
      * @param cmd   Message command (msg_cmd_t or HexStr)
      */
@@ -52,11 +62,14 @@ class Message {
 
     /**< Convert a HexStr to a standard message
      * @param hexStr        HexStr to convert to the message
+     * @returns             This pointer to enable chaining
      */
     fromHexStr(hexStr) {
         this.setCmd(hexStr.toString().substring(0, 4));
         // TODO, manage original hexStr payload length, rather than calculate the new payload len
         this.setPayload(hexStr.toString().substring(8));
+
+        return this;
     }
 
     /**< Print the standard message */
