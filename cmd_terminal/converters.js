@@ -29,11 +29,17 @@ function isValidHexChars(str, expected_len) {
 /**< Stored as a Uint8Array */
 class HexStr
 {
-    constructor() {
+    constructor(hexStr = "") {
         this.rawArray = new Uint8Array();
 
         // set the length object to be the number of bytes in the Uint8Array
         Object.defineProperty(this, 'length', { get: function() { return this.rawArray.length; }});
+
+        // if a parameter was passed to the constructor, generate the hex string
+        if (hexStr != "")
+        {
+            this.fromHexString(hexStr);
+        }
     }
 
     /**< Get the hex array as a string of hex characters
