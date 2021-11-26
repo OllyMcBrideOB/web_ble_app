@@ -168,65 +168,6 @@ class HexStr
     /**< Print the raw HexStr byte array */
     print() {
         
-class Message {
-    constructor(cmd, payload) {
-        this.cmd = new HexStr();
-        this.payload_len = new HexStr();
-        this.payload = new HexStr();
-
-        this.setCmd(cmd);
-        this.setPayload(payload);
-
-        // set the length object to be the number of bytes in the Uint8Arrays
-        Object.defineProperty(this, 'length', { get: function() { 
-            return this.cmd.length + this.payload.length; 
-        }});
-    }
-
-    setCmd(cmd) {
-        this.cmd.fromHexString(cmd);
-    }
-
-    setPayload(payload) {
-        this.payload.fromHexString(payload);
-        this.payload_len.fromNumber(this.payload.length, "uint16");       // TODO, this may need to be preconfigured as a uint16_t (i.e. 4 hex chars)
-    }
-
-    print() {
-        console.log("Cmd: %s Len: '%s' Payload: '%s'\n", 
-                    this.cmd.toString(), this.payload_len.toString(), this.payload.toString())
-
-
-        let full_byte_array = new HexStr();
-        // full_byte_array.toUint8Array()
-        full_byte_array.fromUint8Array([this.cmd.toUint8Array(), this.payload_len.toUint8Array(), this.payload.toUint8Array()]);
-        full_byte_array.print();
         console.log("rawArray: '%s'", this.toString("-"));
     }
 }
-
-// class LargeMessage extends Message {
-//     constructor(cmd, packet_num, payload) {
-//         super(cmd, payload);
-        
-//         this.packet_num = new HexStr();
-//         this.packet_num.fromHexString(packet_num);
-
-//         // // set the length object to be the number of bytes in the Uint8Arrays
-//         // Object.defineProperty(this, 'length', { get: function() { 
-//         //     return this.cmd.length + this.payload.length + 4;           // + 4 for the packet_num len
-//         // }});
-//     }
-
-//     setPacketNum(packet_num) {
-//         this.packet_num = packet_num;
-//     }
-
-//     print() {
-//         console.log("Cmd: %s Len: '%s' PacketNum: '%s' Payload: '%s'\n", 
-//                     this.cmd.toString(), this.payload_len.toString(), this.packet_num.toString(), this.payload.toString())
-//     }
-// }
-
-let msg = new Message("1234", "001122334455667788");
-msg.print();
