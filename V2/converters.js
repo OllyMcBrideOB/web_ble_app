@@ -60,6 +60,7 @@ class HexStr
 
     /**< Create a HexStr from a Uint8Array 
      * @param arr       A Uint8Array to copy to the HexStr
+     * @returns         this pointer, to enable function chaining
      */
     fromUint8Array(arr) {
         if (arr instanceof Uint8Array) {        // if we just have a single Uint8Array
@@ -84,11 +85,14 @@ class HexStr
         } else {
             console.log("ERROR - Unable to call HexStr::fromUint8Array() as value is of type '%s'", typeof num);
         }
+
+        return this;
     }
 
     /**< Create a HexStr from an integer (little endian) 
      * @param num       Number to add to convert from
      * @param type      Type/format of the number (e.g. uint8, uint16, uint32)
+     * @returns         this pointer, to enable function chaining
     */
     fromNumber(num, type) {
         // ensure the object is a Number
@@ -113,10 +117,13 @@ class HexStr
         } else {
             console.log("ERROR - Unable to call HexStr::fromNumber() as value '%s' is of type '%s'", num.toString(), typeof num);
         }
+
+        return this;
     }
 
     /**< Convert a string of hex chars to an array of hex values
      * @param str       String of hex characters
+     * @returns         this pointer, to enable function chaining
      */
     fromHexString(str) {
         // if the string is empty, create an empty array
@@ -149,10 +156,12 @@ class HexStr
         } else {
             console.log("Error - toHexArray() str: '%s' is not a valid hex str", str)
         }
+        return this;
     }
 
     /**< Convert a string of UTF-8 characters to an array of hex values
      * @param str       String of UTF-8 characters
+     * @returns         this pointer, to enable function chaining
      */
     fromUTF8String(str) {
         console.log("fromUTF8String(%s)", str);
@@ -163,11 +172,14 @@ class HexStr
         for (var i = 0; i < str.length; i++) {
             this.rawArray[i] = str.charCodeAt(i);
         }
+        return this;
     }
 
     /**< Print the raw HexStr byte array */
     print() {
         
         console.log("rawArray: '%s'", this.toString("-"));
+
+        return this;
     }
 }
