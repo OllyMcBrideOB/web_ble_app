@@ -30,9 +30,14 @@ class Message {
     }
 
     /**< Set the message command
-     * @param cmd   Message command
+     * @param cmd   Message command (msg_cmd_t or HexStr)
      */
     setCmd(cmd) {
+        // if the cmd is a msg_cmd_t key, get the value
+        if (msg_cmd_t[cmd] != undefined) {
+            cmd = msg_cmd_t[cmd];
+        }
+
         this.cmd.fromHexString(cmd);
     }
     
