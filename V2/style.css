@@ -49,6 +49,12 @@ header label {
 
 /* Command Request */
 
+#commands_key{
+    font-size: 12px;
+    font-family: Arial;
+    padding-bottom: 2px;
+}
+
 .container_requests {
     display: flex;
     margin-top: 8px;

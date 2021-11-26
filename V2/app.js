@@ -64,21 +64,20 @@ document.getElementById("l_request_payload").addEventListener("input", function(
 
 /**< If the Standard Request 'Enter' button is clicked */
 document.getElementById("s_request_enter").addEventListener("click", function(event) {
-    if (GATT.connected()) {
-        let cmd = new HexStr();
-        let payload = new HexStr();
-        cmd.fromHexString(document.getElementById("s_request_cmd").value);
-        payload.fromHexString(document.getElementById("s_request_payload").value);
+    let terminal_msg = "No BLE Device Connected"
 
-        let tx_msg = new Message(cmd, payload);
+    if (GATT.isConnected()) {
+        let tx_msg = new Message(document.getElementById("s_request_cmd").value, 
+                                document.getElementById("s_request_payload").value);
         tx_msg.print();
 
-
-        // write the message to the Command Terminal component
-        document.getElementById("label_cmd_responses").innerHTML += "=>" + rx_msg.toString() + "<br>";
-        let response_label_div = document.getElementById("cmd_responses_terminal");
-        response_label_div.scrollTop = response_label_div.scrollHeight;
+        terminal_msg = "=> " + tx_msg.toString()
     }
+
+    // write the message to the Command Terminal component
+    document.getElementById("label_cmd_responses").innerHTML += terminal_msg + "<br>";
+    let response_label_div = document.getElementById("cmd_responses_terminal");
+    response_label_div.scrollTop = response_label_div.scrollHeight;
 });
 
 /**
@@ -163,7 +162,7 @@ function subscibeToCharacteristics() {
         let rx_msg = new Message();
         rx_msg.fromHexStr(rx_hex_str);
         // write the message to the Command Terminal component
-        document.getElementById("label_cmd_responses").innerHTML += "<=" + rx_msg.toString() + "<br>";
+        document.getElementById("label_cmd_responses").innerHTML += "<= " + rx_msg.toString() + "<br>";
         let response_label_div = document.getElementById("cmd_responses_terminal");
         response_label_div.scrollTop = response_label_div.scrollHeight;
     })
