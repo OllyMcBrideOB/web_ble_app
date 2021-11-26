@@ -129,10 +129,12 @@ class HexStr
      * @param str       String of hex characters
      */
     fromHexString(str) {
-        console.log("fromHexString(%s)", str);
-        
+        // if the string is empty, create an empty array
+        if (str == "") {
+            this.rawArray = new Uint8Array(0);
+        }
         // if the string contains hex characters
-        if (isValidHexStr(str)) {
+        else if (isValidHexStr(str)) {
             // if the first digits are '0x' or '0X', remove them
             if (str.substring(0, 2).match(/0x|0X/)) {
                 console.log("stripped '%s' from str: '%s'", str.substring(0, 2), str);
