@@ -53,8 +53,6 @@ document.getElementById("l_request_cmd").addEventListener("input", function(even
 
 /**< If the Standard Request payload is valid, enable the Enter button, else disable it */
 document.getElementById("s_request_payload").addEventListener("input", function(event) {
-    
-    // document.getElementById("s_request_len").value = event.target.value.length;
     document.getElementById("l_request_payload").value = event.target.value;
 
 });
@@ -80,6 +78,30 @@ document.getElementById("s_request_enter").addEventListener("click", function(ev
         document.getElementById("label_cmd_responses").innerHTML += "=>" + rx_msg.toString() + "<br>";
         let response_label_div = document.getElementById("cmd_responses_terminal");
         response_label_div.scrollTop = response_label_div.scrollHeight;
+    }
+});
+
+/**
+ * When a file has been selected from the file explorer, print it to the file manager text box
+ */
+document.getElementById("file").addEventListener("change", function(event) {
+    // if a valid file was selected
+    if (this.files.length > 0) {
+        // prepare a file reader
+        const reader = new FileReader();
+        
+        // prepare the 'load' callback
+        reader.onload = function fileReadComplete() {
+            let file_contents = new HexStr();
+            file_contents.fromUint8Array(new Uint8Array(reader.result));
+            document.getElementById("file_viewer_box").innerHTML = file_contents.toString("-").toUpperCase();
+        };
+
+        // peform the read
+        reader.readAsArrayBuffer(this.files[0]);
+
+    } else {
+        console.log("No file selected (len == 0)")
     }
 });
 
