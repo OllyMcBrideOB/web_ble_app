@@ -136,6 +136,7 @@ function onPayloadEntered(payload) {
  * Upon connection complete, change the Connect button & subscribe to characteristics
  */
 function onConnectionComplete() {
+    writeToCommandTerminal("Connected to " + GATT.deviceDisplayName(), "none")
 
     // upon successful conneciton, set the device name & change the button to 'Disconnect
     document.getElementById("label_dev").innerHTML = GATT.deviceDisplayName();
@@ -164,7 +165,6 @@ function subscibeToCharacteristics() {
  * @param {"tx","rx","none"} tx_rx String to indicate if it is a tx or rx message
  */
 function writeToCommandTerminal(val, tx_rx) {
-
     // determine the indicator direction
     const tx_rx_indicator = (tx_rx == "tx") ? "=> " : (tx_rx == "rx") ? "<= " : ""; 
     let val_str = "";
@@ -192,9 +192,23 @@ function writeToCommandTerminal(val, tx_rx) {
     }
 
     // write the message to the Command Terminal component
-    document.getElementById("label_cmd_responses").innerHTML += tx_rx_indicator + val_str + "<br>";
+    document.getElementById("label_cmd_responses").innerHTML += getTimestampStr() + " " + tx_rx_indicator + val_str + "<br>";
 
     // scroll to the bottom of the terminal
     let response_label_div = document.getElementById("cmd_responses_terminal");
     response_label_div.scrollTop = response_label_div.scrollHeight;
 }
+
+/**
+ * Get the current datetime timestamp as a string
+ * @returns Current time as hh:mm:ss.milliseconds
+ */
+function getTimestampStr() {
+    const date = new Date(Date.now());
+
+    return date.getHours().toString().padStart(2, "0") + ":" +
+            date.getMinutes().toString().padStart(2, "0") + ":" + 
+            date.getSeconds().toString().padStart(2, "0") + "."  + 
+            date.getMilliseconds().toString().padStart(4, 2);
+}
+
