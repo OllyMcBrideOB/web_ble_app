@@ -134,7 +134,7 @@ class HexStr
         else if (isValidHexStr(str)) {
             // if the first digits are '0x' or '0X', remove them
             if (str.substring(0, 2).match(/0x|0X/)) {
-                console.log("stripped '%s' from str: '%s'", str.substring(0, 2), str);
+                // console.log("stripped '%s' from str: '%s'", str.substring(0, 2), str);
                 str = str.substring(2);
             }
 

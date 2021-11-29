@@ -179,7 +179,7 @@ class GATTcharacteristic extends GATTitem {
 
             // try to write the HexStr to the characteristic
             try {
-                hexStr.print();
+                // hexStr.print();
 
                 // TODO, convert val to Uint8Array
                 this.handle.writeValueWithoutResponse(hexStr.rawArray);
