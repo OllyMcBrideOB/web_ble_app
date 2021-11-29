@@ -72,16 +72,25 @@ class Message {
         return this;
     }
 
+    /**< Convert an ArrayBuffer to a standard message
+     * @param buf           ArrayBuffer to convert to the message
+     * @returns             This pointer to enable chaining
+     */
+    fromArrayBuffer(buf) {
+        this.fromHexStr(new HexStr().fromUint8Array(new Uint8Array(event.target.value.buffer)))
+
+        return this;
+    }
+
     /**< Print the standard message */
     print() {
         console.log("Cmd: %s Len: '%s' Payload: '%s'\n", 
                     this.cmd.toString(), this.payload_len.toString(), this.payload.toString())
 
-
-        let full_byte_array = new HexStr();
-        // full_byte_array.toUint8Array()
-        full_byte_array.fromUint8Array([this.cmd.toUint8Array(), this.payload_len.toUint8Array(), this.payload.toUint8Array()]);
-        full_byte_array.print();
+        // print underlying array
+        // let full_byte_array = new HexStr();
+        // full_byte_array.fromUint8Array([this.cmd.toUint8Array(), this.payload_len.toUint8Array(), this.payload.toUint8Array()]);
+        // full_byte_array.print();
     }
 }
 
