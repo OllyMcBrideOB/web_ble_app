@@ -171,7 +171,6 @@ class FileTransfer {
                     // unregister the callback
                     GATT.GATTtable.NRTservice.NRTResponse.onValueChangeRemove(response_cb);
                     
-                    // writeToCommandTerminal(rx_msg, "rx") // other cb in 'subscibeToCharacteristics()' resonsible for writing to terminal
                     resolve(rx_msg)
                 }
             }
@@ -189,7 +188,8 @@ class FileTransfer {
                     GATT.GATTtable.NRTservice.NRTLargeRequest.write(req_msg);
                     break;
                 default:
-                    console.log("Failed to call FileTransfer::writeMsg(msg, msg_type). msg_type should be 'standard' or 'large'")
+                    console.log("writeThenGetResponse(msg, msg_type) failed, msg_type should be 'standard' or 'large'");
+                    reject("writeThenGetResponse(msg, msg_type) failed, msg_type should be 'standard' or 'large'");
                     break;
             }
         });                        
