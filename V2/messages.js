@@ -56,7 +56,28 @@ class Message {
      * @param payload   Message payload
      */
     setPayload(payload) {
-        this.payload.fromHexString(payload);
+        // convert the value to a HexStr
+        if (payload instanceof HexStr) {
+            this.payload = payload;
+        } else if (payload instanceof Message) {
+            this.payload = payload.toHexStr();
+        } else {
+            switch (typeof payload) {
+                case "string":
+                    try {
+                        this.payload.fromHexString(payload);
+                    } catch(e) {
+                        this.payload.fromUTF8String(payload);
+                    }
+                    break;
+                case "Uint8Array":
+                    this.payload.fromArray(payload);
+                    break;
+                default:
+                    console.log("ERROR - Unable to set payload as type '%s' is not handled", typeof payload)
+            }
+        }
+
         this.payload_len.fromNumber(this.payload.length, "uint16");       // TODO, this may need to be preconfigured as a uint16_t (i.e. 4 hex chars)
     }
 
