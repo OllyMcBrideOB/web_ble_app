@@ -155,6 +155,7 @@ class HexStr
             }
         } else {
             console.log("Error - toHexArray() str: '%s' is not a valid hex str", str)
+            throw("Error - toHexArray() str: '" + str + "' is not a valid hex str")
         }
         return this;
     }
@@ -164,8 +165,6 @@ class HexStr
      * @returns         this pointer, to enable function chaining
      */
     fromUTF8String(str) {
-        console.log("fromUTF8String(%s)", str);
-
         this.rawArray = new Uint8Array(str.length);
 
         // convert 2-char hex string values to a hex-byte within the raw array
@@ -173,6 +172,33 @@ class HexStr
             this.rawArray[i] = str.charCodeAt(i);
         }
         return this;
+    }
+
+    /**
+     * Return true if the object parameter is equal to this HexStr
+     * @param {HexStr} obj HexStr object to check for equality
+     * @returns True if the object parameter is equal to this HexStr
+     */
+    equals(obj) {
+        // ensure the object is of the same type as this
+        if (typeof obj != typeof this) {
+            return false;
+        }
+
+        // ensure the underlying arrays are the same length
+        if (obj.rawArray.length != this.rawArray.length) {
+            return false;
+        }
+
+        // iterate through the raw array elements of this object looking for a discrepancy between this and obj
+        for (let i in this.rawArray) {
+            if (obj.rawArray[i] != this.rawArray[i]) {
+                return false;   
+            }
+        }
+
+        // the objects are the same
+        return true;
     }
 
     /**< Print the raw HexStr byte array */
