@@ -20,7 +20,11 @@ function fileStatusToString(file_status) {
         91      : "FILENAME_TOO_LONG",    /**< Filename too long */
         120     : "FILE_ALREADY_OPEN",    /**< File is already open */
     }
-     return status_str[file_status];
+    try {
+        return status_str[file_status];
+    } catch(e) {
+        return "Unknown (" + file_status + ")";
+    }
 }
 
 
@@ -197,7 +201,7 @@ class FileTransfer {
                              " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") " +
                              "\ttotal written: " + this.bytesSent)
         } else {
-            printFileStatus("ERROR - Invalid FS_CLOSE response (len: %d/%d)", close_msg_response.payload.length, 1)
+            printFileStatus("ERROR - Invalid FS_CLOSE response (len: " + close_msg_response.payload.length + "/" + 1 + ")")
         }
 
     }
@@ -206,7 +210,7 @@ class FileTransfer {
      * Stop the file transfer
      */
     stop() {
-        this.printStatus("FileTransfer::stop()");
+        printFileStatus("FileTransfer::stop()");
 
         // TODO, do we need to cancel any promises?
     }
@@ -223,16 +227,6 @@ function printFileStatus(str) {
     scrollbox.scrollTop = scrollbox.scrollHeight;
 }
 
-    /**
-     * Write a string to the file status terminal & console.log()
-     * @param {string} str Status string to write to the status terminal
-     */
-    printStatus(str) {
-        console.log(str)
-        document.getElementById("label_status_box").innerHTML += str + "<br>";
-        let scrollbox = document.getElementById("fm_status_box");
-        scrollbox.scrollTop = scrollbox.scrollHeight;
-    }
 /**< Variable used to time how long a 'file operation' takes */
 let file_op_start_time = 0;
 
