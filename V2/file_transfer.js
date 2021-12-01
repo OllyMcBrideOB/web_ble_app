@@ -42,7 +42,7 @@ class FileTransfer {
      * @param {File} file A file object containing the filename & file data
      */
     async start(file) {
-        this.printStatus("FileTransfer::start()");
+        printFileStatus("FileTransfer::start()");
         this.packet_counter = 0;
         this.file = file;
         this.bytesSent = 0;
@@ -62,7 +62,7 @@ class FileTransfer {
             //     .then(_ => this.run())
             //     .then(_ => this.afterLastRun())
             //     .catch(error =>  {
-            //         this.printStatus("start().catch(): " + error);
+            //         printFileStatus("start().catch(): " + error);
             //         this.stop();
             //     });
             this.stop();
@@ -77,7 +77,7 @@ class FileTransfer {
      * Send the messge to open/create the required file
      */
     async beforeFirstRun() {
-        this.printStatus("FileTransfer::beforeFirstRun()");
+        printFileStatus("FileTransfer::beforeFirstRun()");
         
         // generate message to open the file
         const packet_num = new HexStr().fromNumber(0, "uint16");      // packet 0
@@ -87,7 +87,7 @@ class FileTransfer {
         let open_file_msg = new Message("FS_OPEN", payload);
 
         // write the FS_OPEN message and await the response
-        const open_msg_response = await this.writeThenGetResponse(open_file_msg, "large");
+        const open_msg_response = await writeThenGetResponse(open_file_msg, "large");
 
         // confirm response payload length is valid
         if (open_msg_response.payload.length == 4) {
@@ -96,12 +96,12 @@ class FileTransfer {
             const file_status = new Uint8Array(open_msg_response.payload.rawArray.buffer, 1, 1);
             const file_data_size = new Uint16Array(open_msg_response.payload.rawArray.buffer, 2, 1);
             
-            this.printStatus("FS_OPEN file_id: 0x" + Number(this.file_id).toString(16).padStart(2, "0") + 
+            printFileStatus("FS_OPEN file_id: 0x" + Number(this.file_id).toString(16).padStart(2, "0") + 
                              "\tstatus: " + fileStatusToString(Number(file_status)) + 
                              " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") " +
                              "\tsize: 0x" + file_data_size.toString() + " bytes")
         } else {
-            this.printStatus("ERROR - Invalid FS_OPEN response (len: %d/%d)", open_msg_response.payload.length, 4);
+            printFileStatus("ERROR - Invalid FS_OPEN response (len: %d/%d)", open_msg_response.payload.length, 4);
             throw("ERROR - Invalid FS_OPEN response (len: %d/%d)", open_msg_response.payload.length, 4)
         }
     }
@@ -110,7 +110,7 @@ class FileTransfer {
      * Transfer the file a packet at a time
      */
     async run() {
-        this.printStatus("FileTransfer::run()");
+        printFileStatus("FileTransfer::run()");
         
         let nRetries = 0;
 
@@ -139,7 +139,7 @@ class FileTransfer {
             const write_file_msg = new Message("FS_WRITE", payload);
 
             // write the FS_WRITE message and await the response
-            const write_msg_response = await this.writeThenGetResponse(write_file_msg, "large");
+            const write_msg_response = await writeThenGetResponse(write_file_msg, "large");
 
             // confirm response payload length is valid
             if (write_msg_response.payload.length == 4) {
@@ -148,7 +148,7 @@ class FileTransfer {
                 const file_status = new Uint8Array(write_msg_response.payload.rawArray.buffer, 1, 1);
                 const n_written = Number(new Uint16Array(write_msg_response.payload.rawArray.buffer, 2, 1));
                 
-                this.printStatus("FS_WRITE file_id: 0x" + Number(this.file_id).toString(16).padStart(2, "0") + 
+                printFileStatus("FS_WRITE file_id: 0x" + Number(this.file_id).toString(16).padStart(2, "0") + 
                                 "\tstatus: " + fileStatusToString(Number(file_status)) + 
                                 " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") " +
                                 "\tsize: 0x" + file_data_size.toString() + " bytes")
@@ -162,13 +162,13 @@ class FileTransfer {
 
 
             } else {
-                this.printStatus("ERROR - Invalid FS_WRITE response (len: " + write_msg_response.payload.length + "/" + 4 + ")");
+                printFileStatus("ERROR - Invalid FS_WRITE response (len: " + write_msg_response.payload.length + "/" + 4 + ")");
                 // throw("ERROR - Invalid FS_WRITE response (len: %d/%d)", write_msg_response.payload.length, 4)
                 nRetries++;
             }
 
             if (nRetries >= 5) {
-                this.printStatus("Stopped FS_WRITE after " + nRetries + " retries");
+                printFileStatus("Stopped FS_WRITE after " + nRetries + " retries");
                 break;
             }
         }
@@ -178,26 +178,26 @@ class FileTransfer {
      * Close the file after 
      */
     async afterLastRun() {
-        this.printStatus("FileTransfer::afterLastRun()");
+        printFileStatus("FileTransfer::afterLastRun()");
 
         // generate message to close the file
         const file_id = new HexStr().fromUint8Array(this.file_id);      // file id
         const close_file_msg = new Message("FS_CLOSE", file_id);
 
         // write the FS_CLOSE message and await the response
-        const close_msg_response = await this.writeThenGetResponse(close_file_msg, "standard");
+        const close_msg_response = await writeThenGetResponse(close_file_msg, "standard");
 
         // confirm response payload length is valid
         if (close_msg_response.payload.length == 1) {
             // parse response payload
             const file_status = new Uint8Array(close_msg_response.payload.rawArray.buffer, 0, 1);
             
-            this.printStatus("FS_CLOSE file_id: 0x" + Number(this.file_id).toString(16).padStart(2, "0") + 
+            printFileStatus("FS_CLOSE file_id: 0x" + Number(this.file_id).toString(16).padStart(2, "0") + 
                              "\tstatus: " + fileStatusToString(Number(file_status)) + 
                              " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") " +
                              "\ttotal written: " + this.bytesSent)
         } else {
-            this.printStatus("ERROR - Invalid FS_CLOSE response (len: %d/%d)", close_msg_response.payload.length, 1)
+            printFileStatus("ERROR - Invalid FS_CLOSE response (len: %d/%d)", close_msg_response.payload.length, 1)
         }
 
     }
@@ -210,7 +210,18 @@ class FileTransfer {
 
         // TODO, do we need to cancel any promises?
     }
+}
 
+/**
+ * Write a string to the file status terminal & console.log()
+ * @param {string} str Status string to write to the status terminal
+ */
+function printFileStatus(str) {
+    console.log(str)
+    document.getElementById("label_status_box").innerHTML += str + "<br>";
+    let scrollbox = document.getElementById("fm_status_box");
+    scrollbox.scrollTop = scrollbox.scrollHeight;
+}
 
     /**
      * Write a string to the file status terminal & console.log()
