@@ -71,7 +71,7 @@ class Message {
                     }
                     break;
                 case "Uint8Array":
-                    this.payload.fromArray(payload);
+                    this.payload.fromUint8Array(payload);
                     break;
                 default:
                     console.log("ERROR - Unable to set payload as type '%s' is not handled", typeof payload)
