@@ -125,6 +125,27 @@ document.getElementById("btn_send_read_file").addEventListener("click", function
 });
 
 /**
+ * When the File Manager 'refresh' button has been clicked, get the Hero BLE directory layout
+ */
+document.getElementById("btn_remote_refresh").addEventListener("click", function(event) {
+    discoverRemoteDirectoryStructure();
+});
+
+/**
+ * When the File Manager file manager 'clear' button has been clicked, clear all file manager elements
+ */
+ document.getElementById("btn_file_clear").addEventListener("click", function(event) {
+    document.getElementById("label_nav").innerHTML = "";
+    document.getElementById("fm_viewer").innerHTML = "";
+    const f_size_elements = document.getElementsByClassName("label_file_size")
+    for (var e of f_size_elements) {
+        e.innerHTML = "0";
+    }
+    document.getElementById("label_filename").innerHTML = "N/a";
+    document.getElementById("label_file_transfer_dur").innerHTML = "-";
+});
+
+/**
  * Copy the message command string into the request message classes
  * @param {string} cmd Message command string of hex characters
  */
