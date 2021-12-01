@@ -233,4 +233,20 @@ function printFileStatus(str) {
         let scrollbox = document.getElementById("fm_status_box");
         scrollbox.scrollTop = scrollbox.scrollHeight;
     }
+/**< Variable used to time how long a 'file operation' takes */
+let file_op_start_time = 0;
+
+/**
+ * Start the 'file operation' timer
+ */
+function operationTimerStart() {
+    file_op_start_time = Date.now();
+    document.getElementById("label_file_transfer_dur").innerHTML = "...";
+}
+
+/**
+ * Stop the 'file operation' timer and display the duration
+ */
+function operationTimerStop() {
+    document.getElementById("label_file_transfer_dur").innerHTML = Date.now() - file_op_start_time;
 }
