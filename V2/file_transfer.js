@@ -211,48 +211,6 @@ class FileTransfer {
         // TODO, do we need to cancel any promises?
     }
 
-    /**
-     * Write a request message and then await the response message
-     * @param {Message} req_msg Request message to send to the Hero BLE module
-     * @param {string} msg_type Either "standard" or "large" to indicate which characteristic to use
-     * @returns A Promise that will return the response message
-     */
-    async writeThenGetResponse(req_msg, msg_type) {
-        // return a promise allowing the response to be awaited
-        return new Promise( (resolve, reject) => {
-            let response_cb = (event) => {
-                // convert the ArrayBuffer to a Message
-                const rx_msg = new Message().fromArrayBuffer(event.target.value.buffer);
-                
-                // if we have found the response we're looking for
-                if (rx_msg.cmd.equals(req_msg.cmd))
-                {
-                    // unregister the callback
-                    GATT.GATTtable.NRTservice.NRTResponse.onValueChangeRemove(response_cb);
-                    
-                    resolve(rx_msg)
-                }
-            }
-            
-            // register the callback to detect the responses
-            GATT.GATTtable.NRTservice.NRTRequest.onValueChange(response_cb);
-            
-            // write the request message
-            writeToCommandTerminal(req_msg, "tx")
-            switch (msg_type.toLowerCase()) {
-                case "standard":
-                    GATT.GATTtable.NRTservice.NRTRequest.write(req_msg);
-                    break;
-                case "large":
-                    GATT.GATTtable.NRTservice.NRTLargeRequest.write(req_msg);
-                    break;
-                default:
-                    console.log("writeThenGetResponse(msg, msg_type) failed, msg_type should be 'standard' or 'large'");
-                    reject("writeThenGetResponse(msg, msg_type) failed, msg_type should be 'standard' or 'large'");
-                    break;
-            }
-        });                        
-    }
 
     /**
      * Write a string to the file status terminal & console.log()

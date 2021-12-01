@@ -148,4 +148,71 @@ class Message {
 // let msg = new Message()
 // msg.fromHexStr(a);
 // msg.print()
-// console.log("msg: '%s'", msg.toString())
+// console.log("msg: '%s'", msg.toString())// console.log("msg: '%s'", msg.toString())
+
+/**
+ * Write a request message and then await the response message
+ * @param {Message} req_msg Request message to send to the Hero BLE module
+ * @param {string} req_msg_type Either "standard" or "large" to indicate which characteristic to use for the request message
+ * @param {string} resp_msg_type Either "standard" or "large" to indicate which characteristic to use for the response message
+ * @returns A Promise that will return the response message
+ */
+async function writeThenGetResponse(req_msg, req_msg_type="standard", resp_msg_type="standard") {
+// return a promise allowing the response to be awaited
+return new Promise( (resolve, reject) => {
+    let response_cb = (event) => {
+        // convert the ArrayBuffer to a Message
+        const rx_msg = new Message().fromArrayBuffer(event.target.value.buffer);
+        
+        // if we have found the response we're looking for
+        if (rx_msg.cmd.equals(req_msg.cmd))
+        {
+            // unregister the callback
+            switch (resp_msg_type.toLowerCase()) {
+                case "standard":
+                    GATT.GATTtable.NRTservice.NRTRequest.onValueChangeRemove(response_cb);
+                    break;
+                case "large":
+                    GATT.GATTtable.NRTservice.NRTLargeRequest.onValueChangeRemove(response_cb);
+                    break;
+                default:
+                    break;
+            }
+            
+            resolve(rx_msg)
+        }
+    }
+    
+    // register the callback to detect the responses
+    switch (resp_msg_type.toLowerCase()) {
+        case "standard":
+            GATT.GATTtable.NRTservice.NRTRequest.onValueChange(response_cb);
+            break;
+        case "large":
+            GATT.GATTtable.NRTservice.NRTLargeRequest.onValueChange(response_cb);
+            break;
+        default:
+            console.log("writeThenGetResponse() failed, resp_msg_type parameter should be 'standard' or 'large'");
+            reject("writeThenGetResponse() failed, resp_msg_type parameter should be 'standard' or 'large'");
+            break;
+    }
+    
+
+
+    
+    // write the request message
+    writeToCommandTerminal(req_msg, "tx")
+    switch (req_msg_type.toLowerCase()) {
+        case "standard":
+            GATT.GATTtable.NRTservice.NRTRequest.write(req_msg);
+            break;
+        case "large":
+            GATT.GATTtable.NRTservice.NRTLargeRequest.write(req_msg);
+            break;
+        default:
+            console.log("writeThenGetResponse() failed, req_msg_type parameter should be 'standard' or 'large'");
+            reject("writeThenGetResponse() failed, req_msg_type parameter should be 'standard' or 'large'");
+            break;
+    }
+});                        
+}
