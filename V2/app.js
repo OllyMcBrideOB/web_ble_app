@@ -102,11 +102,18 @@ document.getElementById("file_selector").addEventListener("change", function(eve
     }
 });
 
+/**
+ * When the File Manager 'start' button has been clicked, start a file transfer to the Hero BLE module
+ */
 document.getElementById("file_transfer_start_btn").addEventListener("click", function(event) {
-    
-    const file_data = [0, 1, 2, 3, 4, 5]
+    const buf_size = 100;
+    let file_data = new Uint8Array(buf_size);
+    for (var i in file_data) {
+        file_data[i] = i;
+    }
+
     const file = new File(file_data, "test_filename.bin");
-    file.length = file_data.length;
+    file.data = new HexStr().fromUint8Array(file_data);
     
     const f = new FileTransfer;
     f.start(file);
