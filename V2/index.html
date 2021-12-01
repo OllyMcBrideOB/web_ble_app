@@ -42,26 +42,62 @@
             </div>
         </div>
     </fieldset>
-    <fieldset id="card_file_explorer" class="card">
+
+    <fieldset id="card_file_manager" class="card">
         <legend>File Manager</legend>
-        <label for="myfile">Select a file:</label>
-        <input type="file" id="file_selector" name="file_selector" accept=".bin,.hex,.txt">
-        <div id="file_viewer" class="scroll_box">
-            <label id="file_viewer_box"></label>
-        </div>
-        <div id="file_transfer">
-            <label id="file_transfer_label">Transfer the file:</label>
-            <button type="submit", id="file_transfer_start_btn">Start</button>
-            <label id="file_size_transferred" class="file_transfer_size_txt">0</label>
-            <label class="file_transfer_size_txt">/</label>
-            <label id="file_size_total" class="file_transfer_size_txt">0</label>
-            <label class="file_transfer_size_txt">bytes</label>
-            <div id="file_transfer_status" class="scroll_box">
-                <label id="file_transfer_status_box"></label>
+        <div id="fm_header">
+            <div id="fm_browse_remote" class="fm_broswe">
+                <label for="btn_remote_refresh">Browse a Remote file:</label>
+                <button id="btn_remote_refresh">Refresh</button>
+            </div>
+            <label id="label_browse_or">Or</label>
+            <div id="fm_browse_local" class="fm_broswe">
+                <label for="myfile">Select a Local file:</label>
+                <input type="file" id="btn_browse_local_file" name="file_selector" accept=".bin,.hex,.txt">
             </div>
         </div>
-    </fieldset>
-    
+        <div id="fm_body">
+            <div id="fm_nav" class="scroll_box">
+            </div>
+            <div id="fm_viewer" class="scroll_box">
+            </div>
+        </div>
+        <div id="fm_file_info">
+            <div id="fm_filename">
+                <label>Filename: </label>
+                <label id="label_filename">N/a</label>
+            </div>
+            <div id="fm_send_read_download">
+                <button id="btn_send_read_file">Send to Hero BLE</button>
+                <button id="btn_file_download">Download</button>
+                <button id="btn_file_clear">Clear</button>
+            </div>
+            <div id="fm_file_size">
+                <label>Size: </label>
+                <label class="label_file_size">0</label>
+                <label>bytes</label>
+            </div>
+        </div>
+        <div id="fm_status_box" class="scroll_box">
+            <label id="label_status_box"></label>
+        </div>
+        <div id="fm_transfer_info">
+            <div id="fm_transfer_dur">
+                <label>Duration:</label>
+                <label id="label_file_transfer_dur">-</label>
+                <label>ms</label>
+            </div>
+            <div id="fm_transfer_progress">
+            </div>
+            <div id="fm_transfer_size">
+                <label>Transferred:</label>
+                <label id="label_file_size_transferred">0</label>
+                <label>/</label>
+                <label class="label_file_size">0</label>
+                <label> bytes</label>
+            </div>
+        </div>
+    </fieldset>    
 </body>
 <script src="uuid.js"></script>
 <script src="converters.js"></script>

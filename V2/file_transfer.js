@@ -46,7 +46,7 @@ class FileTransfer {
         this.packet_counter = 0;
         this.file = file;
         this.bytesSent = 0;
-        document.getElementById("file_size_transferred").innerHTML = this.bytesSent;
+        document.getElementById("label_file_size_transferred").innerHTML = this.bytesSent;
 
         // if the file length is valid
         if (this.file.data.length > 0) {
@@ -158,7 +158,7 @@ class FileTransfer {
                 }
                 
                 this.bytesSent += n_written;
-                document.getElementById("file_size_transferred").innerHTML = this.bytesSent;
+                document.getElementById("label_file_size_transferred").innerHTML = this.bytesSent;
 
 
             } else {
@@ -260,8 +260,8 @@ class FileTransfer {
      */
     printStatus(str) {
         console.log(str)
-        document.getElementById("file_transfer_status_box").innerHTML += str + "<br>";
-        let scrollbox = document.getElementById("file_transfer_status");
+        document.getElementById("label_status_box").innerHTML += str + "<br>";
+        let scrollbox = document.getElementById("fm_status_box");
         scrollbox.scrollTop = scrollbox.scrollHeight;
     }
 }

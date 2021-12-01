@@ -5,6 +5,16 @@ button,input[type=submit] {
     border-radius: 3px;
 }
 
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+legend {
+    font-size: 15px;
+    font-weight: bold;
+}
+
 
 /* Header */
 
@@ -41,7 +51,7 @@ header label {
 
 .scroll_box {
     border: 1px solid gray;
-    height: 200px;
+    height: 150px;
     word-wrap:break-word;
     overflow-y: scroll;
     font-family: monospace;
@@ -61,7 +71,9 @@ header label {
 }
 
 .label_0x {
-    padding-right: 4px;
+    font-size: 14px;
+    padding-top: 2px;
+    padding-right: 2px;
 }
 
 .cmd_field,.len_field {
@@ -79,23 +91,72 @@ header label {
 
 /* File Manager */
 
-#file_viewer {
+#fm_header {
+    display: flex;
+    flex-direction: row;
+}
+
+#label_browse_or {
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+#fm_body {
+    display: flex;
+    flex-direction: row;
     margin-top: 5px;
     margin-bottom: 5px;
 }
 
-#file_transfer {
-    margin-top: 15px;
-    
+#fm_nav {
+    width: 30%;
+    margin-right: 5px;
+    height: 300px;
 }
 
-.file_transfer_size_txt {
-    font-family: Arial;
-    font-size: 13.33333px;
+#fm_viewer {
+    width: 70%;
+    height: 300px;
 }
 
-#file_transfer_status {
-    max-height: 280px;
+#fm_file_info {
+    display: flex;
+    flex-direction: row;
+}
+
+#fm_filename {
+    width: 31%;
+}
+
+#fm_send_read_download {
+    width: 40%;
+}
+
+#fm_file_size {
+    width: 30%;
+    text-align: right;
+}
+
+#fm_status_box {
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+#fm_transfer_info {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+#fm_transfer_dur {
+    width: 25%;
+}
+
+#fm_transfer_progress {
+    width: 40%;
+}
+
+#fm_transfer_size {
+    width: 35%;
+    text-align: right;
 }

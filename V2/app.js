@@ -80,7 +80,7 @@ document.getElementById("s_request_enter").addEventListener("click", function(ev
 /**
  * When a file has been selected from the file explorer, print it to the file manager text box
  */
-document.getElementById("file_selector").addEventListener("change", function(event) {
+document.getElementById("btn_browse_local_file").addEventListener("change", function(event) {
     // if a valid file was selected
     if (this.files.length > 0) {
         // prepare a file reader
@@ -90,11 +90,16 @@ document.getElementById("file_selector").addEventListener("change", function(eve
         reader.onload = function fileReadComplete() {
             let file_contents = new HexStr();
             file_contents.fromUint8Array(new Uint8Array(reader.result));
-            document.getElementById("file_viewer_box").innerHTML = file_contents.toString("-").toUpperCase();
-            document.getElementById("file_size_total").innerHTML = file_contents.length;
+            document.getElementById("fm_viewer").innerHTML = file_contents.toString("-").toUpperCase();
+            document.getElementById("label_filename").innerHTML = reader.filename;
+            const f_size_elements = document.getElementsByClassName("label_file_size")
+            for (var e of f_size_elements) {
+                e.innerHTML = file_contents.length;
+            }
         };
 
         // peform the read
+        reader.filename = this.files[0].name;
         reader.readAsArrayBuffer(this.files[0]);
 
     } else {
@@ -105,7 +110,7 @@ document.getElementById("file_selector").addEventListener("change", function(eve
 /**
  * When the File Manager 'start' button has been clicked, start a file transfer to the Hero BLE module
  */
-document.getElementById("file_transfer_start_btn").addEventListener("click", function(event) {
+document.getElementById("btn_send_read_file").addEventListener("click", function(event) {
     const buf_size = 100;
     let file_data = new Uint8Array(buf_size);
     for (var i in file_data) {
