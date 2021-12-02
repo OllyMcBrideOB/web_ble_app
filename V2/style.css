@@ -42,8 +42,16 @@ header label {
 #btn_connect {
     width: 90px;
     height: 30px;
-    background-color: rgba(161, 158, 158, 0.692);
+    background-color: rgba(161, 158, 158, 0.479);
     border-style: none;
+}
+
+#btn_connect:hover {
+    background-color: rgba(161, 158, 158, 0.658);
+}
+
+#btn_connect:active {
+    background-color: rgba(161, 158, 158, 0.804);
 }
 
 
