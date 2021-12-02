@@ -37,6 +37,13 @@ document.getElementById("btn_connect").addEventListener("click", function() {
     }
 })
 
+/**
+ * If the Commands 'Clear' button is pressed, clear the cmd terminal
+ */
+document.getElementById("btn_clear_cmds").addEventListener("click", function(event) {
+    document.getElementById("label_cmd_responses").innerHTML = "";
+});
+
 /**< If the Standard Request Cmd is valid, enable the Enter button, else disable it */
 document.getElementById("s_request_cmd").addEventListener("input", function(event) {
     document.getElementById("s_request_enter").disabled = !isValidHexChars(event.target.value, 4);
