@@ -120,13 +120,10 @@ document.getElementById("btn_remote_refresh").addEventListener("click", function
     document.getElementById("fm_nav").innerHTML = "";
     document.getElementById("fm_viewer").innerHTML = "";
     document.getElementById("label_status_box").innerHTML = "";
-    const f_size_elements = document.getElementsByClassName("label_file_size")
-    for (var e of f_size_elements) {
-        e.innerHTML = "0";
-    }
     document.getElementById("label_filename").innerHTML = "N/a";
     document.getElementById("label_filename").title = "N/a";
     document.getElementById("label_file_transfer_dur").innerHTML = "-";
+    setFileSize(0);
 });
 
 /**
@@ -297,10 +294,7 @@ function viewFile(file) {
 
             document.getElementById("label_filename").innerHTML = reader.filename;
             document.getElementById("label_filename").title = reader.filename;
-            const f_size_elements = document.getElementsByClassName("label_file_size")
-            for (var e of f_size_elements) {
-                e.innerHTML = file_contents.length;
-            }
+            setFileSize(file_contents.length);
         };
 
         // peform the read
@@ -345,5 +339,16 @@ function isBinFile(file_type) {
         default:
             return false;
             break;
+    }
+}
+
+/**
+ * Update the file size labels
+ * @param {number, string} size Size of the file
+ */
+function setFileSize(size) {
+    const f_size_elements = document.getElementsByClassName("label_file_size")
+    for (var e of f_size_elements) {
+        e.innerHTML = size;
     }
 }
