@@ -29,116 +29,133 @@ function fileStatusToString(file_status) {
 
 
 /**
- * A class to enable transfer of a file to a Hero BLE module using
- * the 'FS_OPEN, FS_WRITE & FS_CLOSE commands
+ * A class to enable transfer of a file to/from a Hero BLE module using
+ * the 'FS_OPEN, FS_READ, FS_WRITE & FS_CLOSE' commands
  */
 class FileTransfer {
     /**
      * Constructor
      */
     constructor() {
-        this.i = 0;
-        this.file_id = NaN;
     }
 
     /**
      * Start a file transfer to the connected Hero BLE module   
      * @param {File} file A file object containing the filename & file data
+     * @param {string} rw Either 'read' or 'write'
      */
-    async start(file) {
+    async start(file, rw) {
         printFileStatus("FileTransfer::start()");
         this.packet_counter = 0;
-        this.file = file;
         this.bytesSent = 0;
         document.getElementById("label_file_size_transferred").innerHTML = this.bytesSent;
+        setFileSize(file.data.length);
 
-        // if the file length is valid
-        if (this.file.data.length > 0) {
-
-            // prepare the file transfer, run the file transfer then close the file transfer
-            await this.beforeFirstRun();
-            await this.run();
-            await this.afterLastRun();
-
-
-            // // prepare the file transfer, run the file transfer then close the file transfer
-            // await this.beforeFirstRun()
-            //     .then(_ => this.run())
-            //     .then(_ => this.afterLastRun())
-            //     .catch(error =>  {
-            //         printFileStatus("start().catch(): " + error);
-            //         this.stop();
-            //     });
-            this.stop();
+        const file_open_flags = new HexStr();
+        switch (rw.toLowerCase()) {
+            case "read":
+                file_open_flags.fromHexString("0x000000");  // read only
+                break;
+            case "write":
+                file_open_flags.fromHexString("0x020802");  // read/write, create & append
+                break;
+            default:
+                break;
         }
-        else
-        {
-            console.log("WARNING - File length 0, therefore there is nothing to transfer")
+
+        operationTimerStart();
+
+        // open the file to read/write
+        const file_id = await this.file_open(file.name, file_open_flags);
+
+        if (file_id != -1) {
+            // read/write the file
+            switch (rw.toLowerCase()) {
+                case "read":
+                    file.data = await this.file_read(file_id);
+                    break;
+                case "write":
+                    await this.file_write(file_id, file.data);
+                    break;
+                default:
+                    break;
+            }
+
+            await this.file_close(file_id);
         }
+        operationTimerStop();
     }
         
     /**
-     * Send the messge to open/create the required file
+     * Open/create a file on the Hero BLE module
+     * @param {string} filename Name of the file to open
+     * @param {HexStr} file_open_flags File r/w permission flags
+     * @returns The id of the file opened (-1 of failure)
      */
-    async beforeFirstRun() {
-        printFileStatus("FileTransfer::beforeFirstRun()");
+    async file_open(filename, file_open_flags) {
+        printFileStatus("FileTransfer::file_open()");
         
         // generate message to open the file
         const packet_num = new HexStr().fromNumber(0, "uint16");      // packet 0
-        const file_open_flags = new HexStr("0x020802");               // read/write, create & append
-        const filename = new HexStr().fromUTF8String(this.file.name + '\0')  // filename
-        const payload = new HexStr().fromUint8Array([packet_num.toUint8Array(), file_open_flags.toUint8Array(), filename.toUint8Array()]);
+        const filename_buf = new HexStr().fromUTF8String(filename + '\0')  // filename
+        const payload = new HexStr().fromUint8Array([packet_num.toUint8Array(), file_open_flags.toUint8Array(), filename_buf.toUint8Array()]);
         let open_file_msg = new Message("FS_OPEN", payload);
 
         // write the FS_OPEN message and await the response
         const open_msg_response = await writeThenGetResponse(open_file_msg, "large");
 
+        let file_id = -1;
+
         // confirm response payload length is valid
         if (open_msg_response.payload.length == 4) {
             // parse response payload
-            this.file_id = new Uint8Array(open_msg_response.payload.rawArray.buffer, 0, 1);
+            file_id = Number(new Uint8Array(open_msg_response.payload.rawArray.buffer, 0, 1));
             const file_status = new Uint8Array(open_msg_response.payload.rawArray.buffer, 1, 1);
             const file_data_size = new Uint16Array(open_msg_response.payload.rawArray.buffer, 2, 1);
             
-            printFileStatus("FS_OPEN file_id: 0x" + Number(this.file_id).toString(16).padStart(2, "0") + 
+            printFileStatus("FS_OPEN file_id: 0x" + file_id.toString(16).padStart(2, "0") + 
                              "\tstatus: " + fileStatusToString(Number(file_status)) + 
                              " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") " +
                              "\tsize: 0x" + file_data_size.toString() + " bytes")
         } else {
-            printFileStatus("ERROR - Invalid FS_OPEN response (len: %d/%d)", open_msg_response.payload.length, 4);
-            throw("ERROR - Invalid FS_OPEN response (len: %d/%d)", open_msg_response.payload.length, 4)
+            printFileStatus("ERROR - Invalid FS_OPEN response (len: " + open_msg_response.payload.length + ")");
+            throw("ERROR - Invalid FS_OPEN response (len: " + open_msg_response.payload.length + ")")
         }
+
+        return file_id;
     }
 
     /**
-     * Transfer the file a packet at a time
+     * Write the file a packet at a time
+     * @param {number} file_id Id of the file to write
+     * @param {Uint8Array} file_data Data to write to the file
      */
-    async run() {
-        printFileStatus("FileTransfer::run()");
+    async file_write(file_id, file_data) {
+        printFileStatus("FileTransfer::file_write()");
         
         let nRetries = 0;
 
         // if there is file data to write
-        while (this.bytesSent < this.file.data.length)
+        while (this.bytesSent < file_data.length)
         {
             const maxDataChunkSize = 6;
-            let nToWrite = this.file.data.length - this.bytesSent;
+            let nToWrite = file_data.length - this.bytesSent;
             if (nToWrite > maxDataChunkSize) {
                 nToWrite = maxDataChunkSize;
             }
 
             // get file data chunk
-            const data_chunk = new Uint8Array(this.file.data.rawArray.buffer, this.bytesSent, nToWrite)
+            const data_chunk = new Uint8Array(file_data.rawArray.buffer, this.bytesSent, nToWrite)
             
             // generate message to write the file
             const packet_num = new HexStr().fromNumber(this.packet_counter++, "uint16");    
-            const file_id = new HexStr().fromUint8Array(this.file_id);   
+            const file_id_buf = new HexStr().fromNumber(file_id, "uint8");   
             const file_data_size = new HexStr().fromNumber(data_chunk.length, "uint16")
             
             const payload = new HexStr().fromUint8Array([packet_num.toUint8Array(), 
-                file_id.toUint8Array(), 
-                file_data_size.toUint8Array(),
-                data_chunk]);
+                                                        file_id_buf.toUint8Array(), 
+                                                        file_data_size.toUint8Array(),
+                                                        data_chunk]);
 
             const write_file_msg = new Message("FS_WRITE", payload);
 
@@ -148,11 +165,11 @@ class FileTransfer {
             // confirm response payload length is valid
             if (write_msg_response.payload.length == 4) {
                 // parse response payload
-                this.file_id = new Uint8Array(write_msg_response.payload.rawArray.buffer, 0, 1);
+                const file_id_buf = new Uint8Array(write_msg_response.payload.rawArray.buffer, 0, 1);
                 const file_status = new Uint8Array(write_msg_response.payload.rawArray.buffer, 1, 1);
                 const n_written = Number(new Uint16Array(write_msg_response.payload.rawArray.buffer, 2, 1));
                 
-                printFileStatus("FS_WRITE file_id: 0x" + Number(this.file_id).toString(16).padStart(2, "0") + 
+                printFileStatus("FS_WRITE file_id: 0x" + Number(file_id_buf).toString(16).padStart(2, "0") + 
                                 "\tstatus: " + fileStatusToString(Number(file_status)) + 
                                 " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") " +
                                 "\tsize: 0x" + file_data_size.toString() + " bytes")
@@ -179,14 +196,15 @@ class FileTransfer {
     }
 
     /**
-     * Close the file after 
+     * Close the file after
+     * @param {number} file_id Id number of the file to close 
      */
-    async afterLastRun() {
-        printFileStatus("FileTransfer::afterLastRun()");
+    async file_close(file_id) {
+        printFileStatus("FileTransfer::file_close()");
 
         // generate message to close the file
-        const file_id = new HexStr().fromUint8Array(this.file_id);      // file id
-        const close_file_msg = new Message("FS_CLOSE", file_id);
+        const payload = new HexStr().fromNumber(file_id, "uint8");      // file id
+        const close_file_msg = new Message("FS_CLOSE", payload);
 
         // write the FS_CLOSE message and await the response
         const close_msg_response = await writeThenGetResponse(close_file_msg, "standard");
@@ -196,23 +214,13 @@ class FileTransfer {
             // parse response payload
             const file_status = new Uint8Array(close_msg_response.payload.rawArray.buffer, 0, 1);
             
-            printFileStatus("FS_CLOSE file_id: 0x" + Number(this.file_id).toString(16).padStart(2, "0") + 
+            printFileStatus("FS_CLOSE file_id: 0x" + Number(file_id).toString(16).padStart(2, "0") + 
                              "\tstatus: " + fileStatusToString(Number(file_status)) + 
                              " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") " +
                              "\ttotal written: " + this.bytesSent)
         } else {
             printFileStatus("ERROR - Invalid FS_CLOSE response (len: " + close_msg_response.payload.length + "/" + 1 + ")")
         }
-
-    }
-    
-    /**
-     * Stop the file transfer
-     */
-    stop() {
-        printFileStatus("FileTransfer::stop()");
-
-        // TODO, do we need to cancel any promises?
     }
 }
 

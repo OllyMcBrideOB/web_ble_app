@@ -98,7 +98,7 @@ document.getElementById("btn_send_read_file").addEventListener("click", function
     file.data = new HexStr().fromUint8Array(file_data);
     
     const f = new FileTransfer;
-    f.start(file);
+    f.start(file, "write");
 });
 
 /**
