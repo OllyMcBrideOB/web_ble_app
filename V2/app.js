@@ -32,9 +32,7 @@ document.getElementById("btn_connect").addEventListener("click", function() {
         else {
             console.log("Disconnecting");
             GATT.disconnect();
-            // reset the header to known values
-            document.getElementById("label_dev").innerHTML = GATT.deviceDisplayName();     // set to None by GATT
-            document.getElementById("btn_connect").innerHTML = "Connect"
+            onDisconnect();
         }
     }
 })
@@ -107,7 +105,12 @@ document.getElementById("btn_send_read_file").addEventListener("click", function
  * When the File Manager 'refresh' button has been clicked, get the Hero BLE directory layout
  */
 document.getElementById("btn_remote_refresh").addEventListener("click", function(event) {
-    discoverRemoteDirectoryStructure();
+    if (GATT.isConnected()) {
+        discoverRemoteDirectoryStructure();
+    } else {
+        console.log("No Bluetooth device Connected");
+    }
+
 });
 
 /**
@@ -150,14 +153,27 @@ function onPayloadEntered(payload) {
  * Upon connection complete, change the Connect button & subscribe to characteristics
  */
 function onConnectionComplete() {
-    writeToCommandTerminal("Connected to " + GATT.deviceDisplayName(), "none")
-
+    writeToCommandTerminal("Connected to " + GATT.deviceDisplayName())
+    
     // upon successful conneciton, set the device name & change the button to 'Disconnect
     document.getElementById("label_dev").innerHTML = GATT.deviceDisplayName();
     document.getElementById("btn_connect").innerHTML = "Disconnect"
+    document.getElementById("btn_remote_refresh").disabled = false;
+    document.getElementById("btn_send_read_file").disabled = false;
     
     subscibeToCharacteristics();
+}
 
+/**
+ * Upon a disconnect from the BLE peripheral, disable buttons & print message
+ */
+function onDisconnect() {
+    writeToCommandTerminal("Disconnected BLE Peripheral")
+
+    document.getElementById("label_dev").innerHTML = GATT.deviceDisplayName();     // set to None by GATT
+    document.getElementById("btn_connect").innerHTML = "Connect"
+    document.getElementById("btn_remote_refresh").disabled = true;
+    document.getElementById("btn_send_read_file").disabled = true;
 }
 
 /**
@@ -184,7 +200,7 @@ function subscibeToCharacteristics() {
  * @param {val} val A value to write to the command terminal
  * @param {"tx","rx","none"} tx_rx String to indicate if it is a tx or rx message
  */
-function writeToCommandTerminal(val, tx_rx) {
+function writeToCommandTerminal(val, tx_rx="none") {
     // determine the indicator direction
     const tx_rx_indicator = (tx_rx == "tx") ? "=> " : (tx_rx == "rx") ? "<= " : ""; 
     let val_str = "";
