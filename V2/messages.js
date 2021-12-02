@@ -170,10 +170,10 @@ return new Promise( (resolve, reject) => {
             // unregister the callback
             switch (resp_msg_type.toLowerCase()) {
                 case "standard":
-                    GATT.GATTtable.NRTservice.NRTRequest.onValueChangeRemove(response_cb);
+                    GATT.GATTtable.NRTservice.NRTResponse.onValueChangeRemove(response_cb);
                     break;
                 case "large":
-                    GATT.GATTtable.NRTservice.NRTLargeRequest.onValueChangeRemove(response_cb);
+                    GATT.GATTtable.NRTservice.NRTLargeResponse.onValueChangeRemove(response_cb);
                     break;
                 default:
                     break;
@@ -186,19 +186,16 @@ return new Promise( (resolve, reject) => {
     // register the callback to detect the responses
     switch (resp_msg_type.toLowerCase()) {
         case "standard":
-            GATT.GATTtable.NRTservice.NRTRequest.onValueChange(response_cb);
+            GATT.GATTtable.NRTservice.NRTResponse.onValueChange(response_cb);
             break;
         case "large":
-            GATT.GATTtable.NRTservice.NRTLargeRequest.onValueChange(response_cb);
+            GATT.GATTtable.NRTservice.NRTLargeResponse.onValueChange(response_cb);
             break;
         default:
             console.log("writeThenGetResponse() failed, resp_msg_type parameter should be 'standard' or 'large'");
             reject("writeThenGetResponse() failed, resp_msg_type parameter should be 'standard' or 'large'");
             break;
     }
-    
-
-
     
     // write the request message
     writeToCommandTerminal(req_msg, "tx")
