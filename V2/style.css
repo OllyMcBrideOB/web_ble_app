@@ -144,6 +144,9 @@ header label {
 
 #fm_filename {
     width: 31%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #fm_send_read_download {

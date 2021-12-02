@@ -81,29 +81,8 @@ document.getElementById("s_request_enter").addEventListener("click", function(ev
  * When a file has been selected from the file explorer, print it to the file manager text box
  */
 document.getElementById("btn_browse_local_file").addEventListener("change", function(event) {
-    // if a valid file was selected
-    if (this.files.length > 0) {
-        // prepare a file reader
-        const reader = new FileReader();
-        
-        // prepare the 'load' callback
-        reader.onload = function fileReadComplete() {
-            let file_contents = new HexStr();
-            file_contents.fromUint8Array(new Uint8Array(reader.result));
-            document.getElementById("fm_viewer").innerHTML = file_contents.toString("-").toUpperCase();
-            document.getElementById("label_filename").innerHTML = reader.filename;
-            const f_size_elements = document.getElementsByClassName("label_file_size")
-            for (var e of f_size_elements) {
-                e.innerHTML = file_contents.length;
-            }
-        };
-
-        // peform the read
-        reader.filename = this.files[0].name;
-        reader.readAsArrayBuffer(this.files[0]);
-
-    } else {
-        console.log("No file selected (len == 0)")
+    if (event.target.files.length > 0) {
+        viewFile(event.target.files[0]);
     }
 });
 
@@ -143,6 +122,7 @@ document.getElementById("btn_remote_refresh").addEventListener("click", function
         e.innerHTML = "0";
     }
     document.getElementById("label_filename").innerHTML = "N/a";
+    document.getElementById("label_filename").title = "N/a";
     document.getElementById("label_file_transfer_dur").innerHTML = "-";
 });
 
@@ -252,3 +232,102 @@ function getTimestampStr() {
             date.getMilliseconds().toString().padStart(4, 2);
 }
 
+/**
+ * When a file is dropped in the fm_viewer, load it into the fm_viewer  
+ * @param {event} event Event from a file being dropped in the fm_viewer
+ */
+function fileDropHandler(event) {
+    console.log('File(s) dropped');
+
+    // Prevent default behavior (Prevent file from being opened)
+    event.preventDefault();
+
+    // Use DataTransferItemList interface to access the file(s)
+    if (event.dataTransfer.items.length > 0) {
+        // If dropped items aren't files, reject them
+        if (event.dataTransfer.items[0].kind === 'file') {
+            viewFile(event.dataTransfer.items[0].getAsFile());
+        }
+    }
+}
+
+/**
+ * When a file is dragged over the fm_viewer, disbale the default event behaviour
+ * @param {event} event Event from a file being dragged over the the fm_viewer
+ */
+function fileDragOverHandler(event) {
+    // Prevent default behavior (Prevent file from being opened)
+    event.preventDefault();
+}
+
+/**
+ * Read and display a file in the file viewer
+ * @param {File} file File to be displayed within the file viewer
+ */
+function viewFile(file) {
+    if (isTextFile(file.type) || isBinFile(file.type)) {
+        // prepare a file reader
+        const reader = new FileReader();
+        
+        // prepare the 'load' callback
+        reader.onload = function fileReadComplete() {
+            let file_contents = new HexStr();
+            file_contents.fromUint8Array(new Uint8Array(reader.result));
+            if (isTextFile(file.type)) {
+                document.getElementById("fm_viewer").innerHTML = file_contents.toUTF8String().replaceAll("\n", "<br>");
+            } else {
+                document.getElementById("fm_viewer").innerHTML = file_contents.toString("-").toUpperCase();
+            }
+
+            document.getElementById("label_filename").innerHTML = reader.filename;
+            document.getElementById("label_filename").title = reader.filename;
+            const f_size_elements = document.getElementsByClassName("label_file_size")
+            for (var e of f_size_elements) {
+                e.innerHTML = file_contents.length;
+            }
+        };
+
+        // peform the read
+        reader.filename = file.name;
+        reader.readAsArrayBuffer(file);
+    } else {
+        document.getElementById("fm_viewer").innerHTML = "Invalid file type (" + file.type + ")";
+    }
+}
+
+/**
+ * Return true if the file_type is compatible text file
+ * @param {string} file_type Type of the file
+ * @returns True if the file is a compatible text file
+ */
+function isTextFile(file_type) {
+    switch(file_type) {
+        case ".json":
+        case "text/plain":
+        case "application/vnd.ms-excel":
+            return true;
+            break;
+        default:
+            return false;
+            break;
+    }
+}
+                
+/**
+ * Return true if the file_type is compatible binary/hex file
+ * @param {string} file_type Type of the file
+ * @returns True if the file is a compatible binary/hex file
+ */
+function isBinFile(file_type) {
+    switch(file_type) {
+        case ".bin":
+        case ".hex":
+        case ".txt":
+        case "application/octet-stream":
+            return true;
+            break;
+        default:
+            return false;
+            break;
+    }
+}
