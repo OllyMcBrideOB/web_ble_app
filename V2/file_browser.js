@@ -44,20 +44,7 @@ async function discoverRemoteDirectoryStructure() {
 
     // re-entrant function to print a filename & any subdirectories
     printChildren = (parent, indent) => {
-        var nav_element_counter = 0;
-        let new_label = document.createElement("label_nav_element_" + nav_element_counter++);
-        new_label.setAttribute("class", "label_nav_element");
-        new_label.setAttribute("class", "disable-select");
-        new_label.value = parent;
-        new_label.innerHTML = "- ".repeat(indent) + parent.filename + ((fileTypeToString(parent.type) == "Directory") ? "/" : "");
-        document.getElementById("fm_nav").appendChild(new_label);
-
-        new_label.addEventListener("click", function(event) {
-            console.log("clicked element: " + event.target.innerHTML);
-            if (fileTypeToString(event.target.value.type) == "File") {
-                document.getElementById("label_filename").innerHTML = event.target.value.filename;
-            }
-        })
+        generateNavElement(parent, indent);
 
         // if the file is a directory
         if (fileTypeToString(parent.type) == "Directory") {
@@ -67,18 +54,61 @@ async function discoverRemoteDirectoryStructure() {
         }
     }
     
-    
+    // recursively read the directory layout
     const top_level = await browseFiles("");
-    
     for (let d of top_level) {
         await searchForChildren(d);
     }
     
+    document.getElementById("fm_nav").innerHTML = "";
+    // recursively print the directory layout
     for (let d of top_level) {
         printChildren(d, 0);
     }
     
     operationTimerStop();
+}
+
+/**
+ * Generate a new label navigation element in the fm_nav bar
+ * @param {filename, type, child} parent Parent file object
+ * @param {number} indent Number of indents to precede this file in the nav bar
+ */
+function generateNavElement(parent, indent) {
+    var nav_element_counter = 0;
+
+    let new_label = document.createElement("label_nav_element_" + nav_element_counter++);
+    new_label.setAttribute("class", "label_nav_element");
+    new_label.setAttribute("class", "disable-select");
+    new_label.value = parent;
+    new_label.innerHTML = "- ".repeat(indent) + parent.filename + ((fileTypeToString(parent.type) == "Directory") ? "/" : "");
+    new_label.addEventListener("click", onNavElementClick);
+    
+    document.getElementById("fm_nav").appendChild(new_label);
+}
+
+/**
+ * When a label navigation element is clicked, highlight it and then start the file read process
+ * @param {event} event onclick event parameters
+ */
+async function onNavElementClick(event) {
+    if (fileTypeToString(event.target.value.type) == "File") {
+        document.getElementById("label_filename").innerHTML = event.target.value.filename;
+        document.getElementById("label_filename").title = event.target.value.filename;
+        
+        // un highlight last clicked
+        if (event.currentTarget.parentNode.last_clicked != undefined) {
+            event.currentTarget.parentNode.last_clicked.style.fontWeight = "";
+            event.currentTarget.parentNode.last_clicked.style.backgroundColor = "";
+        }
+        
+        // highlight new click
+        event.currentTarget.style.fontWeight = "700";
+        event.currentTarget.style.backgroundColor = "rgba(66, 141, 255, 0.700)";
+        event.currentTarget.parentNode.last_clicked = event.currentTarget;
+
+        document.getElementById("fm_viewer").innerHTML = "Reading file..."
+    }
 }
 
 /**
