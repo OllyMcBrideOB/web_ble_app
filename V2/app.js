@@ -165,7 +165,7 @@ function onConnectionComplete() {
     document.getElementById("btn_remote_refresh").disabled = false;
     document.getElementById("btn_send_read_file").disabled = false;
     
-    subscibeToCharacteristics();
+    subscribeToCharacteristics();
 }
 
 /**
@@ -183,7 +183,7 @@ function onDisconnect() {
 /**
  *  Called after successful connection. Allows characteristics to be subscribed to
  */
-function subscibeToCharacteristics() {
+function subscribeToCharacteristics() {
    
     // subscribe to the NRT response char
     GATT.GATTtable.NRTservice.NRTResponse.onValueChange( function(event) {      
