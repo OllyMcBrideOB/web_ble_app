@@ -135,8 +135,9 @@ document.getElementById("btn_remote_refresh").addEventListener("click", function
  * When the File Manager file manager 'clear' button has been clicked, clear all file manager elements
  */
  document.getElementById("btn_file_clear").addEventListener("click", function(event) {
-    document.getElementById("label_nav").innerHTML = "";
+    document.getElementById("fm_nav").innerHTML = "";
     document.getElementById("fm_viewer").innerHTML = "";
+    document.getElementById("label_status_box").innerHTML = "";
     const f_size_elements = document.getElementsByClassName("label_file_size")
     for (var e of f_size_elements) {
         e.innerHTML = "0";

@@ -33,7 +33,7 @@ async function discoverRemoteDirectoryStructure() {
     // re-entrant function to get the contents of a directory & any subdirectories
     searchForChildren = async (parent) => {
         // if the file is a directory
-        if (parent.type == 3) {
+        if (fileTypeToString(parent.type) == "Directory") {
             parent.child = await browseFiles(parent.filename);
             for (let c of parent.child)
             {
@@ -41,15 +41,26 @@ async function discoverRemoteDirectoryStructure() {
             }
         }
     }
-    
+
     // re-entrant function to print a filename & any subdirectories
     printChildren = (parent, indent) => {
-        document.getElementById("label_nav").innerHTML += "- ".repeat(indent) + 
-        parent.filename + 
-        ((parent.type == 3) ? "/" : "") + 
-        "<br>";
+        var nav_element_counter = 0;
+        let new_label = document.createElement("label_nav_element_" + nav_element_counter++);
+        new_label.setAttribute("class", "label_nav_element");
+        new_label.setAttribute("class", "disable-select");
+        new_label.value = parent;
+        new_label.innerHTML = "- ".repeat(indent) + parent.filename + ((fileTypeToString(parent.type) == "Directory") ? "/" : "");
+        document.getElementById("fm_nav").appendChild(new_label);
+
+        new_label.addEventListener("click", function(event) {
+            console.log("clicked element: " + event.target.innerHTML);
+            if (fileTypeToString(event.target.value.type) == "File") {
+                document.getElementById("label_filename").innerHTML = event.target.value.filename;
+            }
+        })
+
         // if the file is a directory
-        if (parent.type == 3) {
+        if (fileTypeToString(parent.type) == "Directory") {
             for (let c of parent.child) {
                 printChildren(c, indent+1);
             }
@@ -57,14 +68,12 @@ async function discoverRemoteDirectoryStructure() {
     }
     
     
-    document.getElementById("label_nav").innerHTML = "Retrieving directory layout...";
     const top_level = await browseFiles("");
     
     for (let d of top_level) {
         await searchForChildren(d);
     }
     
-    document.getElementById("label_nav").innerHTML = "";
     for (let d of top_level) {
         printChildren(d, 0);
     }

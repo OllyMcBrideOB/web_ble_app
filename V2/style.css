@@ -15,6 +15,14 @@ legend {
     font-weight: bold;
 }
 
+.disable-select {
+    user-select: none; /* supported by Chrome and Opera */
+   -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+   -moz-user-select: none; /* Firefox */
+   -ms-user-select: none; /* Internet Explorer/Edge */
+}
+
 
 /* Header */
 
@@ -112,6 +120,16 @@ header label {
     width: 30%;
     margin-right: 5px;
     height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+#fm_nav *:hover {
+    background-color: rgba(100, 159, 248, 0.379);
+}
+
+#fm_nav *:active {
+    background-color: rgb(100, 159, 248);
 }
 
 #fm_viewer {
