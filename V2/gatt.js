@@ -108,6 +108,25 @@ class GATTmanager {
     disconnect() {
         this.server.disconnect();
         this.connected = false;
+
+        // iterate through each of the predefined services in the local GATT table
+        for (var service in this.GATTtable)
+        {
+            // ensure the object is a service
+            if (this.GATTtable[service] instanceof GATTservice)
+            {
+                // iterate through each of the predefined characteristics in the local GATT table
+                for (var characteristic in this.GATTtable[service])
+                {
+                    // ensure the object is a characteristic
+                    if (this.GATTtable[service][characteristic] instanceof GATTcharacteristic)
+                    {
+                        // unregister all chained callbacks
+                        this.GATTtable[service][characteristic].onValueChangeCallbackChain = [];
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -135,10 +154,10 @@ class GATTservice extends GATTitem {
     }
 }
 
-/**< Array of callbacks to call upon onValueChange */
-onValueChangeCallbackChain = [];
-
 class GATTcharacteristic extends GATTitem {
+    /**< Array of callbacks to call upon onValueChange */
+    onValueChangeCallbackChain = [];
+
     /*< Read the current value of the characteristic */
     read() {
         if (this.gatt_manager.isConnected())
@@ -204,12 +223,11 @@ class GATTcharacteristic extends GATTitem {
         if (this.gatt_manager.isConnected()) {
             try {
                 // append the callback to the array of callbacks
-                onValueChangeCallbackChain.push(callback);
+                this.onValueChangeCallbackChain.push(callback);
 
                 // attach the _onValueChangeCallbackChain to the event 
                 // if (this.callbackChain.length == 1) {
-                    this.handle.addEventListener("characteristicvaluechanged", this._onValueChangeCallbackChain);
-                    // this.handle.addEventListener("characteristicvaluechanged", callback);
+                    this.handle.addEventListener("characteristicvaluechanged", this._onValueChangeCallbackChain.bind(this));
                     this.handle.startNotifications();
                 // }
             } catch(error) {
@@ -228,9 +246,9 @@ class GATTcharacteristic extends GATTitem {
      * @param {function} callback Callback to remove from the event
      */
     onValueChangeRemove(callback) {
-        const index = onValueChangeCallbackChain.indexOf(callback);
+        const index = this.onValueChangeCallbackChain.indexOf(callback);
         if (index > -1) {
-            onValueChangeCallbackChain.splice(index, 1);
+            this.onValueChangeCallbackChain.splice(index, 1);
         }
     }
 
@@ -240,7 +258,7 @@ class GATTcharacteristic extends GATTitem {
      */
     _onValueChangeCallbackChain(event) {
         // iterate through the callback chain and call each in turn
-        for (var c of onValueChangeCallbackChain) {
+        for (var c of this.onValueChangeCallbackChain) {
             c(event);
         }
     }
