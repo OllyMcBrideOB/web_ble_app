@@ -121,7 +121,7 @@ async function browseFiles(root_filename = "") {
             offset += 1;
             const f_name_len = Number(multiple_filenames[offset]);
             offset += 1;
-            const f_name_array = multiple_filenames.subarray(offset, offset + f_name_len)
+            const f_name_array = multiple_filenames.subarray(offset, offset + f_name_len - 1) // -1 to discard null char
             offset += f_name_len;
             const f_name = new HexStr().fromUint8Array(f_name_array);
             
