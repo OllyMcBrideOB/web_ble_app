@@ -94,18 +94,32 @@ document.getElementById("btn_browse_local_file").addEventListener("change", func
 /**
  * When the File Manager 'start' button has been clicked, start a file transfer to the Hero BLE module
  */
-document.getElementById("btn_send_read_file").addEventListener("click", function(event) {
-    const buf_size = 100;
-    let file_data = new Uint8Array(buf_size);
-    for (var i in file_data) {
-        file_data[i] = i;
-    }
+document.getElementById("btn_send_read_file").addEventListener("click", async function(event) {
 
-    const file = new File(file_data, "test_filename.bin");
-    file.data = new HexStr().fromUint8Array(file_data);
-    
     const f = new FileTransfer;
-    f.start(file, "write");
+
+    // const do_op = "WRITE";
+    const do_op = "READ";
+    
+    if (do_op == "WRITE") {
+        // WRITE
+        const filename = "read_test.bin"
+        const buf_size = 100;
+        // const buf_size = 10;
+        let file_data = new Uint8Array(buf_size);
+        for (var i in file_data) {
+            file_data[i] = i;
+        }
+        
+        viewFileInViewer(filename, file_data);
+        await f.write(filename, file_data);
+    } else if (do_op == "READ") {
+        // READ
+        const filename = "read_test.txt"
+        clearFileViewer("Reading file...");
+        const file_data = await f.read(filename);
+        viewFileInViewer(filename, file_data);
+    }
 });
 
 /**
