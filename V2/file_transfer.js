@@ -178,7 +178,7 @@ class FileTransfer {
                                 "\tn_read: " + n_read.toString() + " bytes" + 
                                 "\trx_file_data.length: " + rx_file_data.length)
 
-                printFileStatus("FS_READ data: '" + rx_file_data.toString("-") + "'");
+                // printFileStatus("FS_READ data: '" + rx_file_data.toString("-") + "'");
 
                 file_data.append(rx_file_buf);
                 

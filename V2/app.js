@@ -270,12 +270,12 @@ function getTimestampStr() {
  * When a file is dropped in the fm_viewer, load it into the fm_viewer  
  * @param {event} event Event from a file being dropped in the fm_viewer
  */
-function fileDropHandler(event) {
+document.getElementById("fm_viewer").addEventListener("drop", function(event) {
     console.log('File(s) dropped');
-
+    
     // Prevent default behavior (Prevent file from being opened)
     event.preventDefault();
-
+    
     // Use DataTransferItemList interface to access the file(s)
     if (event.dataTransfer.items.length > 0) {
         // If dropped items aren't files, reject them
@@ -283,22 +283,22 @@ function fileDropHandler(event) {
             loadAndViewFile(event.dataTransfer.items[0].getAsFile());
         }
     }
-}
+});
 
 /**
  * When a file is dragged over the fm_viewer, disbale the default event behaviour
  * @param {event} event Event from a file being dragged over the the fm_viewer
  */
-function fileDragOverHandler(event) {
+document.getElementById("fm_viewer").addEventListener("dragover", function(event) {
     // Prevent default behavior (Prevent file from being opened)
     event.preventDefault();
-}
+});
 
 /**
  * Read and display a file in the file viewer
  * @param {File} file File to be displayed within the file viewer
  */
- function loadAndViewFile(file) {
+function loadAndViewFile(file) {
     if (isTextFile(file.type) || isBinFile(file.type)) {
         // prepare a file reader
         const reader = new FileReader();

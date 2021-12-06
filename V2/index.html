@@ -47,20 +47,20 @@
     <fieldset id="card_file_manager" class="card">
         <legend>File Manager</legend>
         <div id="fm_header">
-            <div id="fm_browse_remote" class="fm_broswe">
+            <div id="fm_browse_remote" class="fm_browse">
                 <label for="btn_remote_refresh">Browse a Remote file:</label>
-                <button id="btn_remote_refresh" disabled="true">Refresh</button>
+                <button id="btn_remote_refresh" title="Get the file structure of the Hero BLE module" disabled="true">Refresh</button>
             </div>
             <label id="label_browse_or">Or</label>
-            <div id="fm_browse_local" class="fm_broswe">
+            <div id="fm_browse_local" class="fm_browse">
                 <label for="myfile">Select a Local file:</label>
                 <input type="file" id="btn_browse_local_file" name="file_selector" accept=".bin,.hex,.txt">
             </div>
         </div>
         <div id="fm_body">
-            <div id="fm_nav" class="scroll_box">
+            <div id="fm_nav" class="scroll_box" title="Click to read the file">
             </div>
-            <div id="fm_viewer" class="scroll_box" ondrop="fileDropHandler(event);" ondragover="fileDragOverHandler(event);">
+            <div id="fm_viewer" class="scroll_box" title="File data">
             </div>
         </div>
         <div id="fm_file_info">
