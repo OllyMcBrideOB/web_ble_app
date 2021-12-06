@@ -213,6 +213,41 @@ class HexStr
         return true;
     }
 
+    /**
+     * Append an object (HexStr, Uint8Array etc.) to this HexStr
+     * @param {*} obj Object to append to the HexStr
+     * @returns This to enable chaining
+     */
+    append(obj) {
+        // convert the value to a HexStr
+        if (obj instanceof HexStr) {
+            var otherHexStr = obj;
+        } else if (obj instanceof Uint8Array) {
+            var otherHexStr = new HexStr().fromUint8Array(obj);
+        } else {
+            switch (typeof obj) {
+                case "string":
+                    try {
+                        var otherHexStr = new HexStr().fromHexString(obj);
+                    } catch(e) {
+                        var otherHexStr = new HexStr().fromUTF8String(obj);
+                    }
+                    break;
+                default:
+                    console.log("ERROR - Unable to append to HexStr as type '%s' is not handled", typeof obj)
+                    return;
+            }
+        }
+
+        const originalRawArray = this.rawArray;
+        const otherRawArray = otherHexStr.rawArray;
+        this.rawArray = new Uint8Array(originalRawArray.length + otherRawArray.length);
+        this.rawArray.set(originalRawArray, 0);
+        this.rawArray.set(otherRawArray, originalRawArray.length);
+
+        return this;
+    }
+
     /**< Print the raw HexStr byte array */
     print() {
         
