@@ -217,7 +217,7 @@ class GATTcharacteristic extends GATTitem {
      */
      onValueChange(callback) {
         if (this.gatt_manager.isConnected()) {
-            this.handle.addEventListener("characteristicvaluechanged", callback.bind(this));
+            this.handle.addEventListener("characteristicvaluechanged", callback);
             this.handle.startNotifications();
         }
         // else if we're not currently connected to a BLE peripheral
@@ -232,6 +232,6 @@ class GATTcharacteristic extends GATTitem {
      * @param {function} callback Callback to remove from the event
      */
     onValueChangeRemove(callback) {
-        this.handle.removeEventListener("characteristicvaluechanged", callback.bind(this));
+        this.handle.removeEventListener("characteristicvaluechanged", callback);
     }
 }
