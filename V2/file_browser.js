@@ -116,11 +116,64 @@ async function onNavElementClick(event) {
  * @param {string} root_filename File/directory name to get a list of the contents
  * @returns An array of objects of filenames & their types
  */
-async function browseFiles(root_filename = "") {
+ async function browseFiles(root_filename = "") {
     
     // printFileStatus("browseFiles(" + root_filename + ")");
 
     let file_list = [];
+
+    /**
+     * Callback to parse the response message
+     * @param {Message} response_msg Response message from the event
+     * @returns True if we have parsed the last packet in the transaction
+     */
+    let response_parser = (response_msg) => {
+        // confirm response payload length is valid
+        if (response_msg.payload.length > 3) {
+            // parse response payload
+            const packet_num = new Uint16Array(response_msg.payload.rawArray.buffer, 0, 1);
+            const multiple_filenames = new Uint8Array(response_msg.payload.rawArray.buffer, 2);
+            const n_fnames_in_packet = multiple_filenames[0];
+            // TODO, check if this is the last packet by analysing packet_num
+            if (packet_num != 0) {
+                printFileStatus("WARNING - FS_GET_DIR_CONTENTS is not currently compatible with multi-packet resposnes")
+            }
+            
+            // printFileStatus("FS_GET_DIR_CONTENTS packet_num: 0x" + Number(packet_num).toString(16).padStart(2, "0") + 
+            //                 "\tn_fnames_in_packet: 0x" + Number(n_fnames_in_packet).toString(16).padStart(2, "0") + " bytes")
+            
+            let offset = 1;
+            while(offset < (response_msg.payload.length - 3)) {
+                const f_type = Number(multiple_filenames[offset]);
+                offset += 1;
+                const f_name_len = Number(multiple_filenames[offset]);
+                offset += 1;
+                const f_name_array = multiple_filenames.subarray(offset, offset + f_name_len - 1) // -1 to discard null char
+                offset += f_name_len;
+                const f_name = new HexStr().fromUint8Array(f_name_array);
+                
+                // printFileStatus("- type: " + fileTypeToString(f_type) + " (" + f_type + ") " +
+                //                 "\tlen: " + f_name_len + 
+                //                 "\tname: " + f_name.toUTF8String())
+
+                file_list.push( {
+                        type:       f_type,
+                        filename:   f_name.toUTF8String()
+                    });
+            }                            
+        } else if(response_msg.payload.length == 3) {
+                // parse response payload
+                const buf = new Uint8Array(response_msg.payload.rawArray.buffer, 0);
+                const file_status = buf.subarray(2, 3);
+                printFileStatus("INFO - Unable to get contents of directory '" + root_filename + "'" +
+                                "\tstatus: " + fileStatusToString(Number(file_status)) + 
+                                " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") ");
+        } else {
+            printFileStatus("ERROR - Invalid FS_GET_DIR_CONTENTS response (len: " + response_msg.payload.length + ")");
+        }
+
+        return true;        // TODO, handle multi-packet responses
+    }
         
     // generate message to open the file
     const packet_num = new HexStr().fromNumber(0, "uint16");            // packet 0
@@ -129,51 +182,7 @@ async function browseFiles(root_filename = "") {
     let ls_msg = new Message("FS_GET_DIR_CONTENTS", payload);
     
     // write the FS_GET_DIR_CONTENTS message and await the response
-    const ls_msg_response = await writeThenGetResponse(ls_msg, "large", "large");
-    
-    // confirm response payload length is valid
-    if (ls_msg_response.payload.length > 3) {
-        // parse response payload
-        const packet_num = new Uint16Array(ls_msg_response.payload.rawArray.buffer, 0, 1);
-        const multiple_filenames = new Uint8Array(ls_msg_response.payload.rawArray.buffer, 2);
-        const n_fnames_in_packet = multiple_filenames[0];
-        // TODO, check if this is the last packet by analysing packet_num
-        if (packet_num != 0) {
-            printFileStatus("WARNING - FS_GET_DIR_CONTENTS is not currently compatible with multi-packet resposnes")
-        }
-        
-        // printFileStatus("FS_GET_DIR_CONTENTS packet_num: 0x" + Number(packet_num).toString(16).padStart(2, "0") + 
-        //                 "\tn_fnames_in_packet: 0x" + Number(n_fnames_in_packet).toString(16).padStart(2, "0") + " bytes")
-        
-        let offset = 1;
-        while(offset < (ls_msg_response.payload.length - 3)) {
-            const f_type = Number(multiple_filenames[offset]);
-            offset += 1;
-            const f_name_len = Number(multiple_filenames[offset]);
-            offset += 1;
-            const f_name_array = multiple_filenames.subarray(offset, offset + f_name_len - 1) // -1 to discard null char
-            offset += f_name_len;
-            const f_name = new HexStr().fromUint8Array(f_name_array);
-            
-            // printFileStatus("- type: " + fileTypeToString(f_type) + " (" + f_type + ") " +
-            //                 "\tlen: " + f_name_len + 
-            //                 "\tname: " + f_name.toUTF8String())
-
-            file_list.push( {
-                    type:       f_type,
-                    filename:   f_name.toUTF8String()
-                });
-        }                            
-    } else if(ls_msg_response.payload.length == 3) {
-            // parse response payload
-            const buf = new Uint8Array(ls_msg_response.payload.rawArray.buffer, 0);
-            const file_status = buf.subarray(2, 3);
-            printFileStatus("INFO - Unable to get contents of directory '" + root_filename + "'" +
-                            "\tstatus: " + fileStatusToString(Number(file_status)) + 
-                            " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") ");
-    } else {
-        printFileStatus("ERROR - Invalid FS_GET_DIR_CONTENTS response (len: " + ls_msg_response.payload.length + ")");
-    }
+    await writeThenGetResponse(ls_msg, "large", "large", response_parser);
 
     return file_list;
 }
