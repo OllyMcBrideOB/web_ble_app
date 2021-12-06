@@ -87,7 +87,7 @@ document.getElementById("s_request_enter").addEventListener("click", function(ev
  */
 document.getElementById("btn_browse_local_file").addEventListener("change", function(event) {
     if (event.target.files.length > 0) {
-        viewFile(event.target.files[0]);
+        loadAndViewFile(event.target.files[0]);
     }
 });
 
@@ -266,7 +266,7 @@ function fileDropHandler(event) {
     if (event.dataTransfer.items.length > 0) {
         // If dropped items aren't files, reject them
         if (event.dataTransfer.items[0].kind === 'file') {
-            viewFile(event.dataTransfer.items[0].getAsFile());
+            loadAndViewFile(event.dataTransfer.items[0].getAsFile());
         }
     }
 }
@@ -284,24 +284,14 @@ function fileDragOverHandler(event) {
  * Read and display a file in the file viewer
  * @param {File} file File to be displayed within the file viewer
  */
-function viewFile(file) {
+ function loadAndViewFile(file) {
     if (isTextFile(file.type) || isBinFile(file.type)) {
         // prepare a file reader
         const reader = new FileReader();
         
         // prepare the 'load' callback
-        reader.onload = function fileReadComplete() {
-            let file_contents = new HexStr();
-            file_contents.fromUint8Array(new Uint8Array(reader.result));
-            if (isTextFile(file.type)) {
-                document.getElementById("fm_viewer").innerHTML = file_contents.toUTF8String().replaceAll("\n", "<br>");
-            } else {
-                document.getElementById("fm_viewer").innerHTML = file_contents.toString("-").toUpperCase();
-            }
-
-            document.getElementById("label_filename").innerHTML = reader.filename;
-            document.getElementById("label_filename").title = reader.filename;
-            setFileSize(file_contents.length);
+        reader.onload = function fileReadComplete() {          
+            viewFileInViewer(reader.filename, new Uint8Array(reader.result));
         };
 
         // peform the read
@@ -313,12 +303,49 @@ function viewFile(file) {
 }
 
 /**
+ * View a file within the fm_viewer box 
+ * @param {string} filename Name of the file, including the extension
+ * @param {HexStr, Uint8Array} file_data A HexStr containing the file data
+ */
+function viewFileInViewer(filename, file_data) {
+    const file_extension = "." + filename.split('.').pop();
+    if (file_data instanceof HexStr) {
+        var file_data_hex_str = file_data;
+    } else if (file_data instanceof Uint8Array) {
+        var file_data_hex_str = new HexStr().fromUint8Array(file_data);
+    }
+
+    if (isTextFile(file_extension)) {
+        document.getElementById("fm_viewer").innerHTML = file_data_hex_str.toUTF8String().replaceAll("\n", "<br>");
+    } else {
+        document.getElementById("fm_viewer").innerHTML = file_data_hex_str.toString("-").toUpperCase();
+    }
+
+    document.getElementById("label_filename").innerHTML = filename;
+    document.getElementById("label_filename").title = filename;
+    setFileSize(file_data.length);
+}
+
+/**
+ * Clear the file viewer, or add an optional message string
+ * @param {string} info_msg An optional info message to dispaly in the viewer (default: "")
+ */
+function clearFileViewer(info_msg = "") {
+    document.getElementById("fm_viewer").innerHTML = info_msg;
+    document.getElementById("label_filename").innerHTML = "N/a";
+    document.getElementById("label_filename").title = "N/a";
+    setFileSize(0);
+    document.getElementById("label_file_size_transferred").innerHTML = "0"
+}
+
+/**
  * Return true if the file_type is compatible text file
  * @param {string} file_type Type of the file
  * @returns True if the file is a compatible text file
  */
 function isTextFile(file_type) {
     switch(file_type) {
+        case ".txt":
         case ".json":
         case "text/plain":
         case "application/vnd.ms-excel":
