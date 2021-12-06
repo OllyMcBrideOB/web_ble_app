@@ -15,6 +15,7 @@ document.getElementById("btn_connect").addEventListener("click", function() {
             // show the 'Devices to connect to' dialog & try to connect to the selected device
             GATT.connect().then(_ => {
                 onConnectionComplete();
+                GATT.subscribeToDisconnect(onDisconnect);
             }).                
             // else if connection failed
             catch(error => {
@@ -32,7 +33,6 @@ document.getElementById("btn_connect").addEventListener("click", function() {
         else {
             console.log("Disconnecting");
             GATT.disconnect();
-            onDisconnect();
         }
     }
 })
@@ -184,8 +184,9 @@ function onConnectionComplete() {
 
 /**
  * Upon a disconnect from the BLE peripheral, disable buttons & print message
+ * @param {event} event BLE GATT disconnect event
  */
-function onDisconnect() {
+function onDisconnect(event) {
     writeToCommandTerminal("Disconnected BLE Peripheral")
 
     document.getElementById("label_dev").innerHTML = GATT.deviceDisplayName();     // set to None by GATT

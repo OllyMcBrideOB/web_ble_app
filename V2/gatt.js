@@ -3,6 +3,7 @@
 
 class GATTmanager {
     constructor() {
+        this.onDisconnect_cb = [];
         this.GATTtable = {};
         this.connected = false;
 
@@ -73,6 +74,8 @@ class GATTmanager {
             // get the representation of the GATT server on the remote device
             this.server = await this.BLEDevice.gatt.connect();    
 
+            this.BLEDevice.addEventListener("gattserverdisconnected", this.#onDisconnect.bind(this));
+
             // iterate through each of the predefined services in the local GATT table
             for (var service in this.GATTtable)
             {
@@ -103,6 +106,15 @@ class GATTmanager {
             throw error;
         }
     }
+
+    /**
+     * Add a callback to be called when the BLE device disconnects
+     * @param {function} cb Callback to call when the BLE device disconnects
+     */
+    subscribeToDisconnect(cb) {
+        this.onDisconnect_cb.push(cb);
+        //this.BLEDevice.addEventListener("gattserverdisconnected", cb);
+    }
     
     /**< Disconnect from the BLE peripheral */
     disconnect() {
@@ -127,6 +139,19 @@ class GATTmanager {
                 }
             }
         }
+    }
+
+    /**
+     * Callback called upon disconnect
+     * @param {*} event BLE on disconnect event
+     */
+    #onDisconnect(event) {
+        this.disconnect();
+        for (let cb of this.onDisconnect_cb) {
+            cb(event);
+        }
+
+        this.onDisconnect_cb = [];
     }
 }
 
