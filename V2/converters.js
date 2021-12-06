@@ -214,11 +214,24 @@ class HexStr
     }
 
     /**
-     * Append an object (HexStr, Uint8Array etc.) to this HexStr
+     * Append multiple objects (HexStr, Uint8Array etc.) to this HexStr
+     * @param {*} args Array of objects to append to the HexStr
+     * @returns This to enable chaining
+     */
+    append(...args) {
+        for (let o of args) {
+            this.#appendSingleObject(o);
+        }
+
+        return this;
+    }
+
+    /**
+     * Append a single object (HexStr, Uint8Array etc.) to this HexStr
      * @param {*} obj Object to append to the HexStr
      * @returns This to enable chaining
      */
-    append(obj) {
+    #appendSingleObject(obj) {
         // convert the value to a HexStr
         if (obj instanceof HexStr) {
             var otherHexStr = obj;
