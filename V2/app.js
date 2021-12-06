@@ -361,6 +361,7 @@ function clearFileViewer(info_msg = "") {
 function isTextFile(file_type) {
     switch(file_type) {
         case ".txt":
+        case ".csv":
         case ".json":
         case "text/plain":
         case "application/vnd.ms-excel":
