@@ -91,13 +91,14 @@ document.getElementById("s_request_enter").addEventListener("click", function(ev
 document.getElementById("btn_browse_local_file").addEventListener("change", function(event) {
     if (event.target.files.length > 0) {
         loadAndViewFile(event.target.files[0]);
+        document.getElementById("btn_file_send").disabled = false;
     }
 });
 
 /**
- * When the File Manager 'start' button has been clicked, start a file transfer to the Hero BLE module
+ * When the File Manager 'Send to Hero BLE' button has been clicked, start a file transfer to the Hero BLE module
  */
-document.getElementById("btn_send_read_file").addEventListener("click", async function(event) {
+document.getElementById("btn_file_send").addEventListener("click", async function(event) {
 
     const f = new FileTransfer;
 
@@ -177,7 +178,7 @@ function onConnectionComplete() {
     document.getElementById("label_dev").innerHTML = GATT.deviceDisplayName();
     document.getElementById("btn_connect").innerHTML = "Disconnect"
     document.getElementById("btn_remote_refresh").disabled = false;
-    document.getElementById("btn_send_read_file").disabled = false;
+    document.getElementById("btn_file_send").disabled = false;
     
     subscribeToCharacteristics();
 }
@@ -192,7 +193,7 @@ function onDisconnect(event) {
     document.getElementById("label_dev").innerHTML = GATT.deviceDisplayName();     // set to None by GATT
     document.getElementById("btn_connect").innerHTML = "Connect"
     document.getElementById("btn_remote_refresh").disabled = true;
-    document.getElementById("btn_send_read_file").disabled = true;
+    document.getElementById("btn_file_send").disabled = true;
 }
 
 /**
@@ -346,11 +347,13 @@ function viewFileInViewer(filename, file_data) {
  * @param {string} info_msg An optional info message to dispaly in the viewer (default: "")
  */
 function clearFileViewer(info_msg = "") {
+    document.getElementById("btn_browse_local_file").value = "";
     document.getElementById("fm_viewer").innerHTML = info_msg;
     document.getElementById("label_filename").innerHTML = "N/a";
     document.getElementById("label_filename").title = "N/a";
     setFileSize(0);
     document.getElementById("label_file_size_transferred").innerHTML = "0"
+    document.getElementById("btn_file_send").disabled = true;
 }
 
 /**
