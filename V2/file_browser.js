@@ -186,15 +186,13 @@ class FileBrowser {
         filename_label.innerHTML = event.target.value.filename;
         filename_label.title = filename_label.innerHTML;
 
+        // un-highlight previously selected element
+        this.#unhighlightElement(this.currentlySelected);
+        
+        // allow us to click a selected to deselect
         if (this.currentlySelected != event.currentTarget) {
-
-            // un-highlight previously selected element
-            this.#unhighlightElement(this.currentlySelected);
-            
-            // highlight clicked element
+            // highlight & remember the clicked element
             this.#highlightElement(event.currentTarget);
-            
-            // remember the clicked element
             this.currentlySelected = event.currentTarget;
         }
 
