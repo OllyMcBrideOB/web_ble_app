@@ -248,7 +248,7 @@ class FileTransfer {
         // if there is file data to write
         while (total_written < file_data.length)
         {
-            const maxDataChunkSize = 6;
+            const maxDataChunkSize = 200;           // TODO, limit chunk to using MTU size
             let n_to_write = file_data.length - total_written;
             if (n_to_write > maxDataChunkSize) {
                 n_to_write = maxDataChunkSize;

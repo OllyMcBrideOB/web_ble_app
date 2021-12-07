@@ -36,8 +36,9 @@ class FileBrowser {
      */
     constructor(parentNode) {
         this.parentNode = parentNode;           // reference to the parent div
-        this.currentlySelected = undefined;     // reference to the currently selected element
         this.elementCounter = 0;                // counter to ensure the elements have an unique id
+        this.currentlySelected = undefined;     // reference to the currently selected element
+        this.selectedDir = "";                  // currently selected directory, to allow files to be written to them
     }
 
     /**
@@ -170,6 +171,8 @@ class FileBrowser {
      */
     clear() {
         this.parentNode.innerHTML = "";
+        this.currentlySelected = undefined;
+        this.selectedDir = "";
     }
 
     /**
@@ -203,6 +206,9 @@ class FileBrowser {
             // const file_data = await f.read(event.target.value.filename);
             const file_data = await f.read(event.target.value.path + "/" + event.target.value.filename);
             viewFileInViewer(event.target.value.filename, file_data);
+            this.selectedDir = event.target.value.path;
+        } else if (this.#isDir(event.target.value.type)) {
+            this.selectedDir = event.target.value.path + "/" + event.target.value.filename;
         }
     }
 

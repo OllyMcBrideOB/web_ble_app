@@ -99,31 +99,13 @@ document.getElementById("btn_browse_local_file").addEventListener("change", func
  * When the File Manager 'Send to Hero BLE' button has been clicked, start a file transfer to the Hero BLE module
  */
 document.getElementById("btn_file_send").addEventListener("click", async function(event) {
-
-    const f = new FileTransfer;
-
-    // const do_op = "WRITE";
-    const do_op = "READ";
+    // get the file currently previewed in the fm_viewer    
+    const fileViewer = document.getElementById("fm_viewer");
+    const localFile = fileViewer.value;
     
-    if (do_op == "WRITE") {
-        // WRITE
-        const filename = "read_test.bin"
-        const buf_size = 100;
-        // const buf_size = 10;
-        let file_data = new Uint8Array(buf_size);
-        for (var i in file_data) {
-            file_data[i] = i;
-        }
-        
-        viewFileInViewer(filename, file_data);
-        await f.write(filename, file_data);
-    } else if (do_op == "READ") {
-        // READ
-        const filename = "read_test.txt"
-        clearFileViewer("Reading file...");
-        const file_data = await f.read(filename);
-        viewFileInViewer(filename, file_data);
-    }
+    // write the file to the selected directory
+    const f = new FileTransfer;
+    await f.write(fileBrowser.selectedDir + "/" + localFile.filename, localFile.data);
 });
 
 /**
@@ -181,6 +163,8 @@ function onConnectionComplete() {
     document.getElementById("btn_file_send").disabled = false;
     
     subscribeToCharacteristics();
+
+    fileBrowser.ls();
 }
 
 /**
@@ -337,6 +321,7 @@ function viewFileInViewer(filename, file_data) {
         document.getElementById("fm_viewer").innerHTML = file_data_hex_str.toString("-").toUpperCase();
     }
 
+    document.getElementById("fm_viewer").value = {filename: filename, data: file_data};
     document.getElementById("label_filename").innerHTML = filename;
     document.getElementById("label_filename").title = filename;
     setFileSize(file_data.length);
@@ -354,6 +339,7 @@ function clearFileViewer(info_msg = "") {
     setFileSize(0);
     document.getElementById("label_file_size_transferred").innerHTML = "0"
     document.getElementById("btn_file_send").disabled = true;
+    document.getElementById("fm_viewer").value = "";
 }
 
 /**
