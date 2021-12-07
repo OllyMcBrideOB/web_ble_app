@@ -130,6 +130,9 @@ header label {
     height: 300px;
     display: flex;
     flex-direction: column;
+    white-space: nowrap;
+    overflow-x: scroll;
+    text-overflow: ellipsis;
 }
 
 #fm_nav *:hover {

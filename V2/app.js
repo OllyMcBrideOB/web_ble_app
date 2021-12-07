@@ -1,6 +1,9 @@
 /**< Create an instance of the GATT manager to allow us to communicate with a BLE Peripheral */
 let GATT = new GATTmanager();
 
+/**< Create an instance of the FileBrowser to list the remote directory structure */
+let fileBrowser = new FileBrowser(document.getElementById("fm_nav"));
+
 /**< Standard & large request messages that are to be sent when the enter button is pressed */
 let standard_req_msg = new Message();
 let large_req_msg = new Message();
@@ -127,7 +130,7 @@ document.getElementById("btn_send_read_file").addEventListener("click", async fu
  */
 document.getElementById("btn_remote_refresh").addEventListener("click", function(event) {
     if (GATT.isConnected()) {
-        discoverRemoteDirectoryStructure();
+        fileBrowser.ls();
     } else {
         console.log("No Bluetooth device Connected");
     }
@@ -138,13 +141,10 @@ document.getElementById("btn_remote_refresh").addEventListener("click", function
  * When the File Manager file manager 'clear' button has been clicked, clear all file manager elements
  */
  document.getElementById("btn_file_clear").addEventListener("click", function(event) {
-    document.getElementById("fm_nav").innerHTML = "";
-    document.getElementById("fm_viewer").innerHTML = "";
     document.getElementById("label_status_box").innerHTML = "";
-    document.getElementById("label_filename").innerHTML = "N/a";
-    document.getElementById("label_filename").title = "N/a";
     document.getElementById("label_file_transfer_dur").innerHTML = "-";
-    setFileSize(0);
+    clearFileViewer();
+    fileBrowser.clear();
 });
 
 /**

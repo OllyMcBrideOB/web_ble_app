@@ -4,7 +4,7 @@
  * @param {Number} file_type Convert the file type enum to a string
  * @returns String of the file type
  */
- function fileTypeToString(file_type) {
+function fileTypeToString(file_type) {
     const type_str = {
         0       : "Unknown",
         1       : "Named pipe (FIFO)",
@@ -23,167 +23,227 @@
 }
 
 /**
- * Recursively read the directory structure on the Hero BLE module and
- * display it in the fm_nav div
+ * File Browser Class
+ * 
+ * This class is responsible for reading the directory structure from the Hero BLE module and
+ * displaying it in hte 'fm_nav' window. When a file is clicked, the file data is read and displayed
+ * in the file viewer window.
  */
-async function discoverRemoteDirectoryStructure() {
-
-    operationTimerStart();
-    
-    // re-entrant function to get the contents of a directory & any subdirectories
-    searchForChildren = async (parent) => {
-        // if the file is a directory
-        if (fileTypeToString(parent.type) == "Directory") {
-            parent.child = await browseFiles(parent.filename);
-            for (let c of parent.child)
-            {
-                await searchForChildren(c);
-            }
-        }
+class FileBrowser {
+    /**
+     * Constructor
+     * @param {element} parentNode Parent div
+     */
+    constructor(parentNode) {
+        this.parentNode = parentNode;           // reference to the parent div
+        this.currentlySelected = undefined;     // reference to the currently selected element
+        this.elementCounter = 0;                // counter to ensure the elements have an unique id
     }
-
-    // re-entrant function to print a filename & any subdirectories
-    printChildren = (parent, indent) => {
-        generateNavElement(parent, indent);
-
-        // if the file is a directory
-        if (fileTypeToString(parent.type) == "Directory") {
-            for (let c of parent.child) {
-                printChildren(c, indent+1);
-            }
-        }
-    }
-    
-    // recursively read the directory layout
-    const top_level = await browseFiles("");
-    for (let d of top_level) {
-        await searchForChildren(d);
-    }
-    
-    document.getElementById("fm_nav").innerHTML = "";
-    // recursively print the directory layout
-    for (let d of top_level) {
-        printChildren(d, 0);
-    }
-    
-    operationTimerStop();
-}
-
-/**
- * Generate a new label navigation element in the fm_nav bar
- * @param {filename, type, child} parent Parent file object
- * @param {number} indent Number of indents to precede this file in the nav bar
- */
-function generateNavElement(parent, indent) {
-    var nav_element_counter = 0;
-
-    let new_label = document.createElement("label_nav_element_" + nav_element_counter++);
-    new_label.setAttribute("class", "label_nav_element");
-    new_label.setAttribute("class", "disable-select");
-    new_label.value = parent;
-    new_label.innerHTML = "- ".repeat(indent) + parent.filename + ((fileTypeToString(parent.type) == "Directory") ? "/" : "");
-    new_label.addEventListener("click", onNavElementClick);
-    
-    document.getElementById("fm_nav").appendChild(new_label);
-}
-
-/**
- * When a label navigation element is clicked, highlight it and then start the file read process
- * @param {event} event onclick event parameters
- */
-async function onNavElementClick(event) {
-    if (fileTypeToString(event.target.value.type) == "File") {
-        document.getElementById("label_filename").innerHTML = event.target.value.filename;
-        document.getElementById("label_filename").title = event.target.value.filename;
-        
-        // un highlight last clicked
-        if (event.currentTarget.parentNode.last_clicked != undefined) {
-            event.currentTarget.parentNode.last_clicked.style.fontWeight = "";
-            event.currentTarget.parentNode.last_clicked.style.backgroundColor = "";
-        }
-        
-        // highlight new click
-        event.currentTarget.style.fontWeight = "700";
-        event.currentTarget.style.backgroundColor = "rgba(66, 141, 255, 0.700)";
-        event.currentTarget.parentNode.last_clicked = event.currentTarget;
-
-        document.getElementById("fm_viewer").innerHTML = "Reading file..."
-    }
-}
-
-/**
- * Get a list of files within directory
- * @param {string} root_filename File/directory name to get a list of the contents
- * @returns An array of objects of filenames & their types
- */
- async function browseFiles(root_filename = "") {
-    
-    // printFileStatus("browseFiles(" + root_filename + ")");
-
-    let file_list = [];
 
     /**
-     * Callback to parse the response message
-     * @param {Message} response_msg Response message from the event
-     * @returns True if we have parsed the last packet in the transaction
-     */
-    let response_parser = (response_msg) => {
-        // confirm response payload length is valid
-        if (response_msg.payload.length > 3) {
-            // parse response payload
-            const packet_num = new Uint16Array(response_msg.payload.rawArray.buffer, 0, 1);
-            const multiple_filenames = new Uint8Array(response_msg.payload.rawArray.buffer, 2);
-            const n_fnames_in_packet = multiple_filenames[0];
-            // TODO, check if this is the last packet by analysing packet_num
-            if (packet_num != 0) {
-                printFileStatus("WARNING - FS_GET_DIR_CONTENTS is not currently compatible with multi-packet resposnes")
-            }
-            
-            // printFileStatus("FS_GET_DIR_CONTENTS packet_num: 0x" + Number(packet_num).toString(16).padStart(2, "0") + 
-            //                 "\tn_fnames_in_packet: 0x" + Number(n_fnames_in_packet).toString(16).padStart(2, "0") + " bytes")
-            
-            let offset = 1;
-            while(offset < (response_msg.payload.length - 3)) {
-                const f_type = Number(multiple_filenames[offset]);
-                offset += 1;
-                const f_name_len = Number(multiple_filenames[offset]);
-                offset += 1;
-                const f_name_array = multiple_filenames.subarray(offset, offset + f_name_len - 1) // -1 to discard null char
-                offset += f_name_len;
-                const f_name = new HexStr().fromUint8Array(f_name_array);
-                
-                // printFileStatus("- type: " + fileTypeToString(f_type) + " (" + f_type + ") " +
-                //                 "\tlen: " + f_name_len + 
-                //                 "\tname: " + f_name.toUTF8String())
+     * Recursively read the directory structure on the Hero BLE module and
+     * display it in the fm_nav div
+     */ 
+    async ls() {
+        operationTimerStart();
 
-                file_list.push( {
-                        type:       f_type,
-                        filename:   f_name.toUTF8String()
-                    });
-            }                            
-        } else if(response_msg.payload.length == 3) {
-                // parse response payload
-                const buf = new Uint8Array(response_msg.payload.rawArray.buffer, 0);
-                const file_status = buf.subarray(2, 3);
-                printFileStatus("INFO - Unable to get contents of directory '" + root_filename + "'" +
-                                "\tstatus: " + fileStatusToString(Number(file_status)) + 
-                                " (0x" + Number(file_status).toString(16).padStart(2, "0") + ") ");
-        } else {
-            printFileStatus("ERROR - Invalid FS_GET_DIR_CONTENTS response (len: " + response_msg.payload.length + ")");
+        // re-entrant function to get the contents of a directory & any subdirectories
+        const searchForChildren = async (file, indent) => {
+            this.createElement(file, indent);
+            // if the file is a directory
+            if (this.#isDir(file.type)) {
+                file.child = await this.browseFiles(file.path + "/" + file.filename);
+                for (let c of file.child) {
+                    await searchForChildren(c, indent+1);
+                }
+            }
+        }
+    
+        // recursively read the directory layout & add each nav element to the nav div
+        printFileStatus("Fetching remote directories...")
+        document.getElementById("fm_nav").innerHTML = "";
+        const dir_structure = await this.browseFiles("");
+        for (let d of dir_structure) {
+            await searchForChildren(d, 0);
         }
 
-        return true;        // TODO, handle multi-packet responses
+        printFileStatus("Directory fetch complete!")
+            
+        operationTimerStop();
     }
+
+    /**
+     * Get a list of files within directory
+     * @param {string} root_filename File/directory name to get a list of the contents
+     * @returns An array of objects of filenames, paths & their types
+     */
+    async browseFiles(root_filename = "") {
+        let file_list = []; // {type: number, filename: string, path: root_filename}
+
+        /**
+         * Callback to parse the response message
+         * @param {Message} response_msg Response message from the event
+         * @returns True if we have parsed the last packet in the transaction
+         */
+        let response_parser = (response_msg) => {
+
+            // if the response includes the packet number
+            if (response_msg.payload.length >= 2) {
+                const resp_packet_num = new Uint16Array(response_msg.payload.rawArray.buffer, 0, 1);
+
+                // if the response could contain multiple filenames
+                if (response_msg.payload.length > 3) {
+                    // parse response payload
+                    const multiple_filenames = new Uint8Array(response_msg.payload.rawArray.buffer, 2);
+                    const n_fnames_in_packet = multiple_filenames[0];
+                    
+                    // parse all of the filenames
+                    let offset = 1;
+                    while(offset < (response_msg.payload.length - 3)) {
+                        const f_type = Number(multiple_filenames[offset]);
+                        offset += 1;
+                        const f_name_len = Number(multiple_filenames[offset]);
+                        offset += 1;
+                        const f_name_array = multiple_filenames.subarray(offset, offset + f_name_len - 1) // -1 to discard null char
+                        offset += f_name_len;
+                        const f_name = new HexStr().fromUint8Array(f_name_array);
+                        
+                        file_list.push( {
+                                type:       f_type,
+                                filename:   f_name.toUTF8String(),
+                                path: root_filename
+                            });
+                    }                            
+                } 
+                // else if the response contains the file status
+                else if(response_msg.payload.length == 3) {
+                        // parse response payload
+                        const file_status = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 2, 1));
+                        printFileStatus("INFO - Unable to get contents of directory '" + root_filename + "/'" +
+                                        "\tstatus: " + fileStatusToString(file_status) + " (0x" + file_status.toString(16).padStart(2, "0") + ") ");
+                }
+
+                return isLastPacket(resp_packet_num);       // return true if we have received the last packet
+            } 
+            // else if we have received an invalid response
+            else {
+                printFileStatus("ERROR - Invalid FS_GET_DIR_CONTENTS response (len: " + response_msg.payload.length + ")");
+                
+                return true;        // return true to end transaction after an error
+            }
+        }
+            
+        // generate message to open the file
+        const packet_num = new HexStr().fromNumber(0, "uint16");            // packet 0
+        const filename = new HexStr().fromUTF8String(root_filename + '\0')  // filename
+        const payload = new HexStr().append(packet_num, filename);
+        let ls_msg = new Message("FS_GET_DIR_CONTENTS", payload);
         
-    // generate message to open the file
-    const packet_num = new HexStr().fromNumber(0, "uint16");            // packet 0
-    const filename = new HexStr().fromUTF8String(root_filename + '\0')  // filename
-    const payload = new HexStr().fromUint8Array([packet_num.toUint8Array(), filename.toUint8Array()]);
-    let ls_msg = new Message("FS_GET_DIR_CONTENTS", payload);
+        // write the FS_GET_DIR_CONTENTS message and await the response
+        await writeThenGetResponse(ls_msg, "large", "large", response_parser);
+
+        return file_list;
+    }
+
+    /**
+     * Create a new navigation element in the nav panel
+     * @param {{type: number, filename: string}} file_info Name of the file associated with the nav element
+     * @param {number} indent Number of indentations for the nav element
+     */
+    createElement(file_info, indent) {
+        let newElement = document.createElement("label_nav_element_" + this.elementCounter++);
+        newElement.setAttribute("class", "label_nav_element");
+        newElement.setAttribute("class", "disable-select");
+        newElement.value = file_info;                                                                               // store a copy of the raw filename
+        newElement.title = file_info.filename;                                                                      // enable tooltip upon hover
+        newElement.innerHTML = "- ".repeat(indent) + file_info.filename + (this.#isDir(file_info.type) ? "/" : ""); // filename, indentation & optional '/'
+        if (newElement.innerHTML.length > 28) {
+            newElement.style.inlineSize = "min-content"                                                             // ensure background colour expands for long filenames
+        }
+        newElement.addEventListener("click", this.#onClick.bind(this));
+        
+        this.parentNode.appendChild(newElement);
+    }
+
+    /**
+     * Remove all nav elements
+     */
+    clear() {
+        this.parentNode.innerHTML = "";
+    }
+
+    /**
+     * When a van element is clicked, un-highlight the previously selected element and highlight the clicked element
+     * @param {onclick event} event onclick event
+     */
+    async #onClick(event) {
+        console.log("click")
+        // clear file viewer
+        // TODO
+        
+        // update the filename label & title (to enable tooltip on hover)
+        const filename_label = document.getElementById("label_filename");
+        filename_label.innerHTML = event.target.value.filename;
+        filename_label.title = filename_label.innerHTML;
+
+        if (this.currentlySelected != event.currentTarget) {
+
+            // un-highlight previously selected element
+            this.#unhighlightElement(this.currentlySelected);
+            
+            // highlight clicked element
+            this.#highlightElement(event.currentTarget);
+            
+            // remember the clicked element
+            this.currentlySelected = event.currentTarget;
+        }
+
+        if (this.#isFile(event.target.value.type)) {
+            // if the clicked element relates to a file, read it from the Hero BLE module
+            const f = new FileTransfer;
+            clearFileViewer("Reading file...");
+            // const file_data = await f.read(event.target.value.filename);
+            const file_data = await f.read(event.target.value.path + "/" + event.target.value.filename);
+            viewFileInViewer(event.target.value.filename, file_data);
+        }
+    }
+
+    /**
+     * Apply highlight formatting to a nav element
+     * @param {html node} element HTML node of the nav element to highlight
+     */
+    #highlightElement(element) {
+        element.style.fontWeight = "700";
+        element.style.backgroundColor = "rgba(66, 141, 255, 0.700)";
+    }
     
-    // write the FS_GET_DIR_CONTENTS message and await the response
-    await writeThenGetResponse(ls_msg, "large", "large", response_parser);
+    /**
+     * Remove the highlight formatting of a nav element
+     * @param {html node} element HTML node of the nav element to unhighlight
+     */
+    #unhighlightElement(element) {
+        if (element != undefined)
+        {
+            element.style.fontWeight = "";
+            element.style.backgroundColor = "";
+        }
+    }
 
-    return file_list;
+    /**
+     * Return true if the file enum is a file
+     * @param {number} file_type File type enum
+     * @returns True if the file enum is a file
+     */
+    #isFile(file_type) {
+        return (fileTypeToString(file_type) == "File");
+    }
+    
+    /**
+     * Return true if the file enum is a directory
+     * @param {number} file_type File type enum
+     * @returns True if the file enum is a directory
+     */
+    #isDir(file_type) {
+        return (fileTypeToString(file_type) == "Directory");
+    }
 }
-
