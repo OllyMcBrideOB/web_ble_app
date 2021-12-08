@@ -130,17 +130,42 @@ header label {
     height: 300px;
     display: flex;
     flex-direction: column;
-    white-space: nowrap;
-    overflow-x: scroll;
-    text-overflow: ellipsis;
 }
 
-#fm_nav *:hover {
+.nav_element{
+    display: flex;
+    flex-direction: row;
+}
+
+.nav_element:hover {
     background-color: rgba(100, 159, 248, 0.379);
 }
 
-#fm_nav *:active {
+.nav_element:active {
     background-color: rgb(100, 159, 248);
+}
+
+.label_nav_element{
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.nav_element:hover > .nav_delete {
+    visibility: visible;
+}
+
+.nav_element:active > .nav_delete {
+    visibility: visible;
+}
+
+.nav_delete {
+    color: red;
+    font-weight: 900;
+    font-family: DejaVu Sans Mono;
+    font-size: 14px;
+    visibility: hidden;
 }
 
 #fm_viewer {

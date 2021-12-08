@@ -148,22 +148,35 @@ class FileBrowser {
 
     /**
      * Create a new navigation element in the nav panel
-     * @param {{type: number, filename: string}} file_info Name of the file associated with the nav element
+     * @param {type: number, filename: string, path: string} file_info File information
      * @param {number} indent Number of indentations for the nav element
      */
     createElement(file_info, indent) {
-        let newElement = document.createElement("label_nav_element_" + this.elementCounter++);
-        newElement.setAttribute("class", "label_nav_element");
-        newElement.setAttribute("class", "disable-select");
-        newElement.value = file_info;                                                                               // store a copy of the raw filename
-        newElement.title = file_info.filename;                                                                      // enable tooltip upon hover
-        newElement.innerHTML = "- ".repeat(indent) + file_info.filename + (this.#isDir(file_info.type) ? "/" : ""); // filename, indentation & optional '/'
-        if (newElement.innerHTML.length > 28) {
-            newElement.style.inlineSize = "min-content"                                                             // ensure background colour expands for long filenames
-        }
-        newElement.addEventListener("click", this.#onClick.bind(this));
+        // create the parent div
+        let navElement = document.createElement("div_nav_element_" + this.elementCounter);
+        navElement.setAttribute("class", "nav_element disable-select");
+        navElement.value = file_info;                                                                               // store a copy of the raw filename
+        navElement.title = file_info.filename;    
+
+        // create the element label
+        let elementLabel = document.createElement("label_nav_element_" + this.elementCounter);
+        elementLabel.setAttribute("class", "label_nav_element disable-select");
+        elementLabel.innerHTML = "- ".repeat(indent) + file_info.filename + (this.#isDir(file_info.type) ? "/" : ""); // filename, indentation & optional '/'
         
-        this.parentNode.appendChild(newElement);
+        // create the delete 'X' icon
+        let deleteIcon = document.createElement("delete_nav_element_" + this.elementCounter);
+        deleteIcon.setAttribute("class", "nav_delete disable-select")
+        deleteIcon.innerHTML= "X"
+        deleteIcon.title = "Click to delete"
+
+        // attach the onclick events
+        elementLabel.addEventListener("click", this.#onLabelClick.bind(this));
+        deleteIcon.addEventListener("click", this.#onDeleteClick.bind(this));
+
+        navElement.appendChild(elementLabel);
+        navElement.appendChild(deleteIcon);
+        this.parentNode.appendChild(navElement);
+        this.elementCounter++;
     }
 
     /**
@@ -176,39 +189,50 @@ class FileBrowser {
     }
 
     /**
-     * When a van element is clicked, un-highlight the previously selected element and highlight the clicked element
-     * @param {onclick event} event onclick event
+     * When a nav element label is clicked, un-highlight the previously selected element and highlight the clicked element
+     * @param {onclick event} event onclick event attached to the elementLabel (i.e. child of the navElement)
      */
-    async #onClick(event) {
-        console.log("click")
-        // clear file viewer
-        // TODO
-        
+    async #onLabelClick(event) {
+        const parent = event.currentTarget.parentNode;
+
         // update the filename label & title (to enable tooltip on hover)
-        const filename_label = document.getElementById("label_filename");
-        filename_label.innerHTML = event.target.value.filename;
+        const filename_label = event.currentTarget;
+        filename_label.innerHTML = parent.value.filename;
         filename_label.title = filename_label.innerHTML;
 
         // un-highlight previously selected element
         this.#unhighlightElement(this.currentlySelected);
         
-        // allow us to click a selected to deselect
-        if (this.currentlySelected != event.currentTarget) {
+        // allow us to click a selected element to deselect
+        if (this.currentlySelected != parent) {
             // highlight & remember the clicked element
-            this.#highlightElement(event.currentTarget);
-            this.currentlySelected = event.currentTarget;
+            this.#highlightElement(parent);
+            this.currentlySelected = parent;
         }
 
-        if (this.#isFile(event.target.value.type)) {
-            // if the clicked element relates to a file, read it from the Hero BLE module
+        // if the clicked element relates to a file, read it from the Hero BLE module
+        if (this.#isFile(parent.value.type)) {
             const f = new FileTransfer;
             clearFileViewer("Reading file...");
-            // const file_data = await f.read(event.target.value.filename);
-            const file_data = await f.read(event.target.value.path + "/" + event.target.value.filename);
-            viewFileInViewer(event.target.value.filename, file_data);
-            this.selectedDir = event.target.value.path;
-        } else if (this.#isDir(event.target.value.type)) {
-            this.selectedDir = event.target.value.path + "/" + event.target.value.filename;
+            const file_data = await f.read(parent.value.path + "/" + parent.value.filename);
+            viewFileInViewer(parent.value.filename, file_data);
+            this.selectedDir = parent.value.path;
+        } else if (this.#isDir(parent.value.type)) {
+            this.selectedDir = parent.value.path + "/" + parent.value.filename;
+        }
+    }
+
+    /**
+     * When a nav element delete icon is clicked, try to remove the remote file
+     * @param {onclick event} event onclick event attached to the elementLabel (i.e. child of the navElement)
+     */
+    async #onDeleteClick(event) {
+        const parent = event.currentTarget.parentNode;
+
+        const f = new FileTransfer();
+        const file_status = await f.remove(parent.value.path + "/" + parent.value.filename);
+        if (fileStatusToString(file_status) == "SUCCESS") {
+            parent.remove();
         }
     }
 
