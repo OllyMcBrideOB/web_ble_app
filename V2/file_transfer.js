@@ -96,6 +96,49 @@ class FileTransfer {
     }
 
     /**
+     * Remove/delete a file from the Hero BLE module
+     * @param {string} filename Path of the file to remove from the Hero BLE module
+     * @returns File status as a number
+     */
+    async remove(filename) {
+        printFileStatus("FileTransfer::remove()");
+
+        let file_status = -1;
+
+        /**
+         * Callback to parse the response message
+         * @param {Message} response_msg Response message from the event
+         * @returns True if we have parsed the last packet in the transaction
+         */
+        let response_parser = function (response_msg){
+            // confirm response payload length is valid
+            if (response_msg.payload.length == 1) {
+                // parse response payload
+                file_status = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 0, 1));
+                
+                printFileStatus("FS_REMOVE filename: " + filename + 
+                                "\tstatus: " + fileStatusToString(Number(file_status)) + " (0x" + Number(file_status).toString(16).padStart(2, "0") + ")")
+            } else {
+                printFileStatus("ERROR - Invalid FS_REMOVE response (len: " + response_msg.payload.length + "/" + 1 + ")")
+            }
+
+            return true;        // return true as the entire response was received (i.e. only a single-packet response)
+        }
+
+        // generate message to close the file
+        const packet_num = new HexStr().fromNumber(0, "uint16");                // packet 0 buffer
+        const filename_buf = new HexStr().fromUTF8String(filename + '\0')       // filename buffer
+        const payload = new HexStr().append(packet_num, filename_buf);
+
+        const close_file_msg = new Message("FS_REMOVE", payload);
+
+        // write the FS_REMOVE message and await the response
+        await writeThenGetResponse(close_file_msg, "large", "standard", response_parser);
+
+        return file_status;
+    }
+
+    /**
      * Open/create a file on the Hero BLE module
      * @param {string} filename Name of the file to open
      * @param {string} file_open_flags File r/w permission flags
