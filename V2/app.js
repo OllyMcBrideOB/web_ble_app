@@ -307,7 +307,7 @@ function loadAndViewFile(file) {
  * @param {string} filename Name of the file, including the extension
  * @param {HexStr, Uint8Array} file_data A HexStr containing the file data
  */
-function viewFileInViewer(filename, file_data) {
+ function viewFileInViewer(filename, file_data) {
     const file_extension = "." + filename.split('.').pop();
     if (file_data instanceof HexStr) {
         var file_data_hex_str = file_data;
@@ -315,15 +315,20 @@ function viewFileInViewer(filename, file_data) {
         var file_data_hex_str = new HexStr().fromUint8Array(file_data);
     }
 
-    if (isTextFile(file_extension)) {
-        document.getElementById("fm_viewer").innerHTML = file_data_hex_str.toUTF8String().replaceAll("\n", "<br>");
+    const fm_viewer = document.getElementById("fm_viewer");
+    const label_filename = document.getElementById("label_filename");
+
+    if (file_data.length == 0) {
+        fm_viewer.innerHTML = " - Empty file - ";
+    } else if (isTextFile(file_extension)) {
+        fm_viewer.innerHTML = file_data_hex_str.toUTF8String().replaceAll("\n", "<br>");
     } else {
-        document.getElementById("fm_viewer").innerHTML = file_data_hex_str.toString("-").toUpperCase();
+        fm_viewer.innerHTML = file_data_hex_str.toString("-").toUpperCase();
     }
 
-    document.getElementById("fm_viewer").value = {filename: filename, data: file_data};
-    document.getElementById("label_filename").innerHTML = filename;
-    document.getElementById("label_filename").title = filename;
+    fm_viewer.value = {filename: filename, data: file_data};
+    label_filename.innerHTML = filename;
+    label_filename.title = filename;
     setFileSize(file_data.length);
 }
 
