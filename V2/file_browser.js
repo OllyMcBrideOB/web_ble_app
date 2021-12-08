@@ -69,6 +69,9 @@ class FileBrowser {
         }
 
         printFileStatus("Directory fetch complete!")
+
+        this.selectedDir = "";
+        document.getElementById("btn_file_send").title = "Save to '" + this.selectedDir + "'";
             
         operationTimerStop();
     }

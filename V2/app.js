@@ -106,6 +106,7 @@ document.getElementById("btn_file_send").addEventListener("click", async functio
     // write the file to the selected directory
     const f = new FileTransfer;
     await f.write(fileBrowser.selectedDir + "/" + localFile.filename, localFile.data);
+    fileBrowser.ls();
 });
 
 /**
@@ -344,6 +345,7 @@ function clearFileViewer(info_msg = "") {
     setFileSize(0);
     document.getElementById("label_file_size_transferred").innerHTML = "0"
     document.getElementById("btn_file_send").disabled = true;
+    document.getElementById("btn_file_send").title = "";
     document.getElementById("fm_viewer").value = "";
 }
 
