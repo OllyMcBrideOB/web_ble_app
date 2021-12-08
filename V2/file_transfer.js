@@ -175,8 +175,8 @@ class FileTransfer {
 
         // generate request message to open the file
         const packet_num = new HexStr().fromNumber(0, "uint16");                // packet 0 buffer
-        const filename_buf = new HexStr().fromUTF8String(filename + '\0')       // filename buffer
         const file_open_flags_buf = new HexStr().fromHexString(file_open_flags) // file open flags buffer
+        const filename_buf = new HexStr().fromUTF8String(filename + '\0')       // filename buffer
         const payload = new HexStr().append(packet_num, file_open_flags_buf, filename_buf);
 
         let request_msg = new Message("FS_OPEN", payload);
@@ -223,7 +223,9 @@ class FileTransfer {
 
                 // printFileStatus("FS_READ data: '" + rx_file_data.toString("-") + "'");
 
-                file_data.append(rx_file_buf);
+                if (n_read > 0) {
+                    file_data.append(rx_file_buf);
+                }
                 
                 document.getElementById("label_file_size_transferred").innerHTML = file_data.length;
 
