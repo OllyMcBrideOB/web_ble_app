@@ -29,10 +29,25 @@ class Message {
                 this.payload.toString("-")
     }
 
+    /**
+     * Get the message as a HexStr
+     * @returns The message as a HexStr
+     */
+    toHexStr() {
+        let full_byte_array = new HexStr();
+        full_byte_array.fromUint8Array([this.cmd.toUint8Array(), this.payload_len.toUint8Array(), this.payload.toUint8Array()]);
+        return full_byte_array;
+    }
+
     /**< Set the message command
-     * @param cmd   Message command
+     * @param cmd   Message command (msg_cmd_t or HexStr)
      */
     setCmd(cmd) {
+        // if the cmd is a msg_cmd_t key, get the value
+        if (msg_cmd_t[cmd] != undefined) {
+            cmd = msg_cmd_t[cmd];
+        }
+
         this.cmd.fromHexString(cmd);
     }
     
@@ -41,17 +56,52 @@ class Message {
      * @param payload   Message payload
      */
     setPayload(payload) {
-        this.payload.fromHexString(payload);
+        // convert the value to a HexStr
+        if (payload instanceof HexStr) {
+            this.payload = payload;
+        } else if (payload instanceof Message) {
+            this.payload = payload.toHexStr();
+        } else {
+            switch (typeof payload) {
+                case "string":
+                    try {
+                        this.payload.fromHexString(payload);
+                    } catch(e) {
+                        this.payload.fromUTF8String(payload);
+                    }
+                    break;
+                case "Uint8Array":
+                    this.payload.fromUint8Array(payload);
+                    break;
+                default:
+                    console.log("ERROR - Unable to set payload as type '%s' is not handled", typeof payload)
+                    return;
+            }
+        }
+
         this.payload_len.fromNumber(this.payload.length, "uint16");       // TODO, this may need to be preconfigured as a uint16_t (i.e. 4 hex chars)
     }
 
     /**< Convert a HexStr to a standard message
      * @param hexStr        HexStr to convert to the message
+     * @returns             This pointer to enable chaining
      */
     fromHexStr(hexStr) {
         this.setCmd(hexStr.toString().substring(0, 4));
         // TODO, manage original hexStr payload length, rather than calculate the new payload len
         this.setPayload(hexStr.toString().substring(8));
+
+        return this;
+    }
+
+    /**< Convert an ArrayBuffer to a standard message
+     * @param buf           ArrayBuffer to convert to the message
+     * @returns             This pointer to enable chaining
+     */
+    fromArrayBuffer(buf) {
+        this.fromHexStr(new HexStr().fromUint8Array(new Uint8Array(event.target.value.buffer)))
+
+        return this;
     }
 
     /**< Print the standard message */
@@ -59,11 +109,10 @@ class Message {
         console.log("Cmd: %s Len: '%s' Payload: '%s'\n", 
                     this.cmd.toString(), this.payload_len.toString(), this.payload.toString())
 
-
-        let full_byte_array = new HexStr();
-        // full_byte_array.toUint8Array()
-        full_byte_array.fromUint8Array([this.cmd.toUint8Array(), this.payload_len.toUint8Array(), this.payload.toUint8Array()]);
-        full_byte_array.print();
+        // print underlying array
+        // let full_byte_array = new HexStr();
+        // full_byte_array.fromUint8Array([this.cmd.toUint8Array(), this.payload_len.toUint8Array(), this.payload.toUint8Array()]);
+        // full_byte_array.print();
     }
 }
 
@@ -100,4 +149,84 @@ class Message {
 // let msg = new Message()
 // msg.fromHexStr(a);
 // msg.print()
-// console.log("msg: '%s'", msg.toString())
+// console.log("msg: '%s'", msg.toString())// console.log("msg: '%s'", msg.toString())
+
+/**
+ * Write a request message and then await the response message
+ * @param {Message} req_msg Request message to send to the Hero BLE module
+ * @param {string} req_msg_type Either "standard" or "large" to indicate which characteristic to use for the request message
+ * @param {string} resp_msg_type Either "standard" or "large" to indicate which characteristic to use for the response message
+ * @param {function} response_parser_cb A callback to call when the response message is received. The cb should return true after the last packet is received correctly
+ * @returns A Promise that will return the response message
+ */
+async function writeThenGetResponse(req_msg, req_msg_type="standard", resp_msg_type="standard", response_parser_cb) {
+    // return a promise allowing the response to be awaited
+    return new Promise( (resolve, reject) => {
+        let response_cb = (event) => {
+            // convert the ArrayBuffer to a Message
+            const rx_msg = new Message().fromArrayBuffer(event.target.value.buffer);
+            
+            // if we have found the response we're looking for
+            if (rx_msg.cmd.equals(req_msg.cmd))
+            {
+                // call the parser callback
+                if (response_parser_cb(rx_msg) == true) {
+                    // if the last packet has been received
+
+                    // unregister the callback
+                    switch (resp_msg_type.toLowerCase()) {
+                        case "standard":
+                            GATT.GATTtable.NRTservice.NRTResponse.onValueChangeRemove(response_cb);
+                            break;
+                        case "large":
+                            GATT.GATTtable.NRTservice.NRTLargeResponse.onValueChangeRemove(response_cb);
+                            break;
+                        default:
+                            break;
+                    }
+                    
+                    resolve(rx_msg)
+                }
+            }
+        }
+        
+        // register the callback to detect the responses
+        switch (resp_msg_type.toLowerCase()) {
+            case "standard":
+                GATT.GATTtable.NRTservice.NRTResponse.onValueChange(response_cb);
+                break;
+            case "large":
+                GATT.GATTtable.NRTservice.NRTLargeResponse.onValueChange(response_cb);
+                break;
+            default:
+                console.log("writeThenGetResponse() failed, resp_msg_type parameter should be 'standard' or 'large'");
+                reject("writeThenGetResponse() failed, resp_msg_type parameter should be 'standard' or 'large'");
+                break;
+        }
+        
+        // write the request message
+        writeToCommandTerminal(req_msg, "tx")
+        switch (req_msg_type.toLowerCase()) {
+            case "standard":
+                GATT.GATTtable.NRTservice.NRTRequest.write(req_msg);
+                break;
+            case "large":
+                GATT.GATTtable.NRTservice.NRTLargeRequest.write(req_msg);
+                break;
+            default:
+                console.log("writeThenGetResponse() failed, req_msg_type parameter should be 'standard' or 'large'");
+                reject("writeThenGetResponse() failed, req_msg_type parameter should be 'standard' or 'large'");
+                break;
+        }
+    });                        
+}
+
+/**
+ * Return true if the 'last packet' flag is set in the packet number
+ * @param {number} packet_num Packet number
+ * @returns True if the 'last packet' flag is set
+ */
+function isLastPacket(packet_num) {
+    const mask = 1 << 15;
+    return ((packet_num & mask) != 0);
+}

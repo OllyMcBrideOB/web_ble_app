@@ -51,6 +51,18 @@ class HexStr
         return str;
     }
 
+    /**< Get the hex array as a string of UTF8 characters
+     * @returns str     Get the hex array as a string of UTF8 characters (e.g. 0x61 = 'a')
+     */
+     toUTF8String() {
+        let str = "";
+        for (let i = 0; i < this.rawArray.length; i++) {
+            // convert the byte value to a it's 2-digit hex representation
+            str += String.fromCharCode(this.rawArray[i]);
+        }
+        return str;
+    }
+
     /**< Return the underlying byte array
      * @returns Uint8Array      The underlying array
      */
@@ -60,6 +72,7 @@ class HexStr
 
     /**< Create a HexStr from a Uint8Array 
      * @param arr       A Uint8Array to copy to the HexStr
+     * @returns         this pointer, to enable function chaining
      */
     fromUint8Array(arr) {
         if (arr instanceof Uint8Array) {        // if we just have a single Uint8Array
@@ -84,11 +97,14 @@ class HexStr
         } else {
             console.log("ERROR - Unable to call HexStr::fromUint8Array() as value is of type '%s'", typeof num);
         }
+
+        return this;
     }
 
     /**< Create a HexStr from an integer (little endian) 
      * @param num       Number to add to convert from
      * @param type      Type/format of the number (e.g. uint8, uint16, uint32)
+     * @returns         this pointer, to enable function chaining
     */
     fromNumber(num, type) {
         // ensure the object is a Number
@@ -113,10 +129,13 @@ class HexStr
         } else {
             console.log("ERROR - Unable to call HexStr::fromNumber() as value '%s' is of type '%s'", num.toString(), typeof num);
         }
+
+        return this;
     }
 
     /**< Convert a string of hex chars to an array of hex values
      * @param str       String of hex characters
+     * @returns         this pointer, to enable function chaining
      */
     fromHexString(str) {
         // if the string is empty, create an empty array
@@ -127,7 +146,7 @@ class HexStr
         else if (isValidHexStr(str)) {
             // if the first digits are '0x' or '0X', remove them
             if (str.substring(0, 2).match(/0x|0X/)) {
-                console.log("stripped '%s' from str: '%s'", str.substring(0, 2), str);
+                // console.log("stripped '%s' from str: '%s'", str.substring(0, 2), str);
                 str = str.substring(2);
             }
 
@@ -148,26 +167,105 @@ class HexStr
             }
         } else {
             console.log("Error - toHexArray() str: '%s' is not a valid hex str", str)
+            throw("Error - toHexArray() str: '" + str + "' is not a valid hex str")
         }
+        return this;
     }
 
     /**< Convert a string of UTF-8 characters to an array of hex values
      * @param str       String of UTF-8 characters
+     * @returns         this pointer, to enable function chaining
      */
     fromUTF8String(str) {
-        console.log("fromUTF8String(%s)", str);
-
         this.rawArray = new Uint8Array(str.length);
 
         // convert 2-char hex string values to a hex-byte within the raw array
         for (var i = 0; i < str.length; i++) {
             this.rawArray[i] = str.charCodeAt(i);
         }
+        return this;
+    }
+
+    /**
+     * Return true if the object parameter is equal to this HexStr
+     * @param {HexStr} obj HexStr object to check for equality
+     * @returns True if the object parameter is equal to this HexStr
+     */
+    equals(obj) {
+        // ensure the object is of the same type as this
+        if (typeof obj != typeof this) {
+            return false;
+        }
+
+        // ensure the underlying arrays are the same length
+        if (obj.rawArray.length != this.rawArray.length) {
+            return false;
+        }
+
+        // iterate through the raw array elements of this object looking for a discrepancy between this and obj
+        for (let i in this.rawArray) {
+            if (obj.rawArray[i] != this.rawArray[i]) {
+                return false;   
+            }
+        }
+
+        // the objects are the same
+        return true;
+    }
+
+    /**
+     * Append multiple objects (HexStr, Uint8Array etc.) to this HexStr
+     * @param {*} args Array of objects to append to the HexStr
+     * @returns This to enable chaining
+     */
+    append(...args) {
+        for (let o of args) {
+            this.#appendSingleObject(o);
+        }
+
+        return this;
+    }
+
+    /**
+     * Append a single object (HexStr, Uint8Array etc.) to this HexStr
+     * @param {*} obj Object to append to the HexStr
+     * @returns This to enable chaining
+     */
+    #appendSingleObject(obj) {
+        // convert the value to a HexStr
+        if (obj instanceof HexStr) {
+            var otherHexStr = obj;
+        } else if (obj instanceof Uint8Array) {
+            var otherHexStr = new HexStr().fromUint8Array(obj);
+        } else {
+            switch (typeof obj) {
+                case "string":
+                    try {
+                        var otherHexStr = new HexStr().fromHexString(obj);
+                    } catch(e) {
+                        var otherHexStr = new HexStr().fromUTF8String(obj);
+                    }
+                    break;
+                default:
+                    console.log("ERROR - Unable to append to HexStr as type '%s' is not handled", typeof obj)
+                    return;
+            }
+        }
+
+        const originalRawArray = this.rawArray;
+        const otherRawArray = otherHexStr.rawArray;
+        this.rawArray = new Uint8Array(originalRawArray.length + otherRawArray.length);
+        this.rawArray.set(originalRawArray, 0);
+        this.rawArray.set(otherRawArray, originalRawArray.length);
+
+        return this;
     }
 
     /**< Print the raw HexStr byte array */
     print() {
         
         console.log("rawArray: '%s'", this.toString("-"));
+
+        return this;
     }
 }

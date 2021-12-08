@@ -3,6 +3,7 @@
 
 class GATTmanager {
     constructor() {
+        this.onDisconnect_cb = [];
         this.GATTtable = {};
         this.connected = false;
 
@@ -73,6 +74,8 @@ class GATTmanager {
             // get the representation of the GATT server on the remote device
             this.server = await this.BLEDevice.gatt.connect();    
 
+            this.BLEDevice.addEventListener("gattserverdisconnected", this.#onDisconnect.bind(this));
+
             // iterate through each of the predefined services in the local GATT table
             for (var service in this.GATTtable)
             {
@@ -103,11 +106,52 @@ class GATTmanager {
             throw error;
         }
     }
+
+    /**
+     * Add a callback to be called when the BLE device disconnects
+     * @param {function} cb Callback to call when the BLE device disconnects
+     */
+    subscribeToDisconnect(cb) {
+        this.onDisconnect_cb.push(cb);
+        //this.BLEDevice.addEventListener("gattserverdisconnected", cb);
+    }
     
     /**< Disconnect from the BLE peripheral */
     disconnect() {
         this.server.disconnect();
         this.connected = false;
+
+        // iterate through each of the predefined services in the local GATT table
+        for (var service in this.GATTtable)
+        {
+            // ensure the object is a service
+            if (this.GATTtable[service] instanceof GATTservice)
+            {
+                // iterate through each of the predefined characteristics in the local GATT table
+                for (var characteristic in this.GATTtable[service])
+                {
+                    // ensure the object is a characteristic
+                    if (this.GATTtable[service][characteristic] instanceof GATTcharacteristic)
+                    {
+                        // unregister all chained callbacks
+                        this.GATTtable[service][characteristic].onValueChangeCallbackChain = [];
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Callback called upon disconnect
+     * @param {*} event BLE on disconnect event
+     */
+    #onDisconnect(event) {
+        this.disconnect();
+        for (let cb of this.onDisconnect_cb) {
+            cb(event);
+        }
+
+        this.onDisconnect_cb = [];
     }
 }
 
@@ -135,7 +179,6 @@ class GATTservice extends GATTitem {
     }
 }
 
-
 class GATTcharacteristic extends GATTitem {
     /*< Read the current value of the characteristic */
     read() {
@@ -152,24 +195,32 @@ class GATTcharacteristic extends GATTitem {
 
     /**< Write a value to the characteristic */
     write(val) {
-        // if (GATTitem.protoype.isConnected)
         if (this.gatt_manager.isConnected())
         {
             var hexStr = new HexStr();
-            switch (typeof val) {
-                case "string":
-                    hexStr.fromUTF8String(val);
-                    break;
-                case "Uint8Array":
-                    hexStr.fromArray(val);
-                    break;
-                default:
-                    console.log("ERROR - Unable to write val to the '%s' characteristic as type '%s' is not handled",
-                        this.name, typeof val)
+            
+            // convert the value to a HexStr
+            if (val instanceof HexStr) {
+                hexStr = val;
+            } else if (val instanceof Message) {
+                hexStr = val.toHexStr();
+            } else {
+                switch (typeof val) {
+                    case "string":
+                        hexStr.fromUTF8String(val);
+                        break;
+                    case "Uint8Array":
+                        hexStr.fromArray(val);
+                        break;
+                    default:
+                        console.log("ERROR - Unable to write val to the '%s' characteristic as type '%s' is not handled",
+                            this.name, typeof val)
+                }
             }
 
+            // try to write the HexStr to the characteristic
             try {
-                console.log("Write: '" + Array.apply([], hexStr.rawArray).join("-") + "'");
+                // hexStr.print();
 
                 // TODO, convert val to Uint8Array
                 this.handle.writeValueWithoutResponse(hexStr.rawArray);
@@ -185,21 +236,27 @@ class GATTcharacteristic extends GATTitem {
         }
     }
 
-    /**< Add a callback to call when the characteristic value changes */
-    onValueChange(callback) {
-        if (this.gatt_manager.isConnected())
-        {
-            try {
-                this.handle.addEventListener("characteristicvaluechanged", callback);
-                this.handle.startNotifications();
-            } catch(error) {
-                console.log("ERROR - Unable to add onValueChange callback to GATT item '%s' " + error, this.UUID)
-            }
+    /**
+     * Add a callback to the list of callbacks to call upon receiving a value from the characteristic
+     * @param {function} callback callback to call upon receiving a value from the characteristic
+     */
+     onValueChange(callback) {
+        if (this.gatt_manager.isConnected()) {
+            this.handle.addEventListener("characteristicvaluechanged", callback);
+            this.handle.startNotifications();
         }
         // else if we're not currently connected to a BLE peripheral
         else
         {
             console.log("ERROR - Unable to write val to the '%s' characteristic as we are not connected to a BLE device", this.name);
         }
+    }
+    
+    /**
+     * Remove a callback to the list of callbacks to call upon receiving a value from the characteristic
+     * @param {function} callback Callback to remove from the event
+     */
+    onValueChangeRemove(callback) {
+        this.handle.removeEventListener("characteristicvaluechanged", callback);
     }
 }

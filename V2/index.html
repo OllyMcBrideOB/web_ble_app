@@ -17,10 +17,15 @@
 <body>
     <fieldset id="card_commands" class="card">
         <legend>Commands</legend>
-        <div id="cmd_responses_terminal">
+        <div id="commands_key">
+            <label>Tx: =></label>
+            <label>Rx: <=</label>
+            <button id="btn_clear_cmds">Clear</button>
+        </div>
+        <div id="cmd_responses_terminal" class="scroll_box">
             <label id="label_cmd_responses"></label>
         </div>
-        <div id="cmd_requests">
+        <div id="cmd_requests"  title="Command as Little Endian">
             <div id="requests_small" class="container_requests">
                 <label class="label_0x">0x</label>
                 <input type="text" id="s_request_cmd" class="cmd_field" placeholder="Cmd">
@@ -38,12 +43,70 @@
             </div>
         </div>
     </fieldset>
-    
+
+    <fieldset id="card_file_manager" class="card">
+        <legend>File Manager</legend>
+        <div id="fm_header">
+            <div id="fm_browse_remote" class="fm_browse">
+                <label for="btn_remote_refresh">Browse a Remote file:</label>
+                <button id="btn_remote_refresh" title="Get the file structure of the Hero BLE module" disabled="true">Refresh</button>
+            </div>
+            <label id="label_browse_or">Or</label>
+            <div id="fm_browse_local" class="fm_browse">
+                <label for="myfile">Select a Local file:</label>
+                <input type="file" id="btn_browse_local_file" name="file_selector" accept=".bin,.hex,.txt">
+            </div>
+        </div>
+        <div id="fm_body">
+            <div id="fm_nav" class="scroll_box" title="Click to read the file">
+            </div>
+            <div id="fm_viewer" class="scroll_box" title="File data">
+            </div>
+        </div>
+        <div id="fm_file_info">
+            <div id="fm_filename">
+                <label>Filename: </label>
+                <label id="label_filename">N/a</label>
+            </div>
+            <div id="fm_send_download_clear">
+                <button id="btn_file_send" disabled="true">Send to Hero BLE</button>
+                <button id="btn_file_download">Download</button>
+                <button id="btn_file_clear">Clear</button>
+            </div>
+            <div id="fm_file_size">
+                <label>Size: </label>
+                <label class="label_file_size">0</label>
+                <label>bytes</label>
+            </div>
+        </div>
+        <div id="fm_status_box" class="scroll_box">
+            <label id="label_status_box"></label>
+        </div>
+        <div id="fm_transfer_info">
+            <div id="fm_transfer_dur">
+                <label>Duration:</label>
+                <label id="label_file_transfer_dur">-</label>
+                <label>ms</label>
+            </div>
+            <div id="fm_transfer_progress">
+            </div>
+            <div id="fm_transfer_size">
+                <label>Transferred:</label>
+                <label id="label_file_size_transferred">0</label>
+                <label>/</label>
+                <label class="label_file_size">0</label>
+                <label> bytes</label>
+            </div>
+        </div>
+    </fieldset>    
 </body>
 <script src="uuid.js"></script>
 <script src="converters.js"></script>
 <script src="gatt.js"></script>
+<script src="message_cmds.js"></script>
 <script src="messages.js"></script>
+<script src="file_transfer.js"></script>
+<script src="file_browser.js"></script>
 <script src="app.js"></script>
 
 </html>
