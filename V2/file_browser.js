@@ -195,11 +195,6 @@ class FileBrowser {
     async #onLabelClick(event) {
         const parent = event.currentTarget.parentNode;
 
-        // update the filename label & title (to enable tooltip on hover)
-        const filename_label = event.currentTarget;
-        filename_label.innerHTML = parent.value.filename;
-        filename_label.title = filename_label.innerHTML;
-
         // un-highlight previously selected element
         this.#unhighlightElement(this.currentlySelected);
         
@@ -220,6 +215,8 @@ class FileBrowser {
         } else if (this.#isDir(parent.value.type)) {
             this.selectedDir = parent.value.path + "/" + parent.value.filename;
         }
+
+        document.getElementById("btn_file_send").title = "Save to '" + this.selectedDir + "'";
     }
 
     /**
