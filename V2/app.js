@@ -384,6 +384,7 @@ function isBinFile(file_type) {
         case ".hex":
         case ".txt":
         case "application/octet-stream":
+        case "application/macbinary":
             return true;
             break;
         default:
