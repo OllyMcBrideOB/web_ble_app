@@ -37,6 +37,10 @@ document.getElementById("btn_connect").addEventListener("click", function() {
             console.log("Disconnecting");
             GATT.disconnect();
         }
+    } else {
+        console.log("Web BLE is not available");
+        writeToCommandTerminal("Web BLE is not available", "none");
+
     }
 })
 
