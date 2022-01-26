@@ -72,6 +72,9 @@ function onDisconnect(event) {
     document.getElementById("btn_connect").innerHTML = "Connect"
 }
 
+
+let chart_index = 0;
+
 /**
  *  Called after successful connection. Allows characteristics to be subscribed to
  */
@@ -88,8 +91,11 @@ function subscribeToCharacteristics() {
         }
         writeToCommandTerminal(str, "rx")
 
-        
+        let json_obj = JSON.parse(str);
 
+        if (json_obj.hasOwnProperty("plot")) {
+            drawChart(json_obj.plot)
+        }
     })
 };
 
@@ -142,4 +148,62 @@ function writeToCommandTerminal(val, tx_rx="none") {
             date.getMinutes().toString().padStart(2, "0") + ":" + 
             date.getSeconds().toString().padStart(2, "0") + "."  + 
             date.getMilliseconds().toString().padStart(4, 2);
+}
+
+
+
+// load current chart package
+google.charts.load("current", {
+    packages: ["corechart", "line"]
+  });
+  
+// set callback function when api loaded
+google.charts.setOnLoadCallback(initCharObject);
+
+
+
+
+function initCharObject() {
+    // draw chart on load
+    global_chart = new google.visualization.LineChart(
+        document.getElementById("chart_div")
+    );
+}
+
+var global_chart;
+let sample_num = 0;
+var chart_data;
+let chart_options;
+let chart_data_labels;
+function drawChart(plot_json_obj) {
+    if (sample_num == 0) {
+
+        chart_data_labels = [ "Sample" ].concat(Object.keys(plot_json_obj));
+
+        // create data object with default value
+        chart_data = google.visualization.arrayToDataTable([
+            chart_data_labels,
+            [0, 0, 0]
+        ]);
+
+        // create options object with titles, colors, etc.
+        chart_options = {
+            title: "Exo Data",
+            hAxis: {
+            title: "Sample"
+            }
+        };
+    }
+
+    let row_data = [sample_num++];
+    for (let i = 1; i < chart_data_labels.length; i++)
+    {
+        row_data.push(plot_json_obj[chart_data_labels[i]]);
+    }
+
+    let row_num = chart_data.addRow(row_data);
+    if (row_num >= 100) {
+        chart_data.removeRow(0);
+    }
+    global_chart.draw(chart_data, chart_options);
 }
