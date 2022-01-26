@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web BLE - Command Terminal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" type="image/jpg" href="bt_favicon.png"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css">
+
+</head>
+<header>
+    <div>
+        <button id="btn_connect">Connect</button>
+        <label>Connected Device:</label>
+        <label id="label_dev">None</label>
+    </div>
+</header>
+<body>
+    <fieldset id="card_commands" class="card">
+        <legend>Commands</legend>
+        <div id="commands_key">
+            <label>Tx: =></label>
+            <label>Rx: <=</label>
+            <button id="btn_clear_cmds">Clear</button>
+        </div>
+        <div id="cmd_responses_terminal" class="scroll_box">
+            <label id="label_cmd_responses"></label>
+        </div>
+        </div>
+    </fieldset>
+<!-- 
+    <table class="charts-css line">
+
+        <caption> 2016 Summer Olympics Medal Table </caption>
+      
+        <thead>
+          <tr>
+            <th scope="col"> Country </th>
+            <th scope="col"> Gold </th>
+            <th scope="col"> Silver </th>
+            <th scope="col"> Bronze </th>
+          </tr>
+        </thead>
+      
+        <tbody>
+          <tr>
+            <th scope="row"> USA </th>
+            <td> 46 </td>
+            <td> 37 </td>
+            <td> 38 </td>
+          </tr>
+          <tr>
+            <th scope="row"> GBR </th>
+            <td> 27 </td>
+            <td> 23 </td>
+            <td> 17 </td>
+          </tr>
+          <tr>
+            <th scope="row"> CHN </th>
+            <td> 26 </td>
+            <td> 18 </td>
+            <td> 26 </td>
+          </tr>
+        </tbody>
+      
+      </table> -->
+
+</body>
+<script src="uuid.js"></script>
+<script src="converters.js"></script>
+<script src="gatt.js"></script>
+<script src="app.js"></script>
+
+</html>
