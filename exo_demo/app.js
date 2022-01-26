@@ -86,10 +86,10 @@ function subscribeToCharacteristics() {
             // convert the byte value to a it's 2-digit hex representation
             str += String.fromCharCode(rawArray[i]);
         }
+        writeToCommandTerminal(str, "rx")
 
-        // // convert the ArrayBuffer to a HexStr
-        // let rx_hex_str = new HexStr().fromUint8Array(new Uint8Array(event.target.value.buffer));
-        // writeToCommandTerminal(rx_hex_str, "rx")
+        
+
     })
 };
 
