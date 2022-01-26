@@ -223,7 +223,7 @@ class GATTcharacteristic extends GATTitem {
                 // hexStr.print();
 
                 // TODO, convert val to Uint8Array
-                this.handle.writeValueWithoutResponse(hexStr.rawArray);
+                this.handle.writeValueWithResponse(hexStr.rawArray);
             } catch(error) {
                 console.log("ERROR - Unable to write '%s' to the '%s' characteristic " + error, val.toString(), this.name, this.UUID)
             }
