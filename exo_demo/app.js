@@ -93,9 +93,8 @@ function subscribeToCharacteristics() {
 
         let json_obj = JSON.parse(str);
 
-        if (json_obj.hasOwnProperty("plot")) {
-            drawChart(json_obj.plot)
-        }
+        drawChart(json_obj);
+        moveElbow(json_obj);
     })
 };
 
@@ -158,52 +157,87 @@ google.charts.load("current", {
   });
   
 // set callback function when api loaded
-google.charts.setOnLoadCallback(initCharObject);
+google.charts.setOnLoadCallback(function() {
+    global_chart = new google.visualization.LineChart(document.getElementById("chart_div"));
+});
 
-
-
-
-function initCharObject() {
-    // draw chart on load
-    global_chart = new google.visualization.LineChart(
-        document.getElementById("chart_div")
-    );
-}
 
 var global_chart;
 let sample_num = 0;
 var chart_data;
 let chart_options;
 let chart_data_labels;
-function drawChart(plot_json_obj) {
-    if (sample_num == 0) {
+function drawChart(json_obj) {
+    if (json_obj.hasOwnProperty("plot")){
+            
+        if (sample_num == 0) {
 
-        chart_data_labels = [ "Sample" ].concat(Object.keys(plot_json_obj));
+            chart_data_labels = [ "Sample" ].concat(Object.keys(json_obj));
 
-        // create data object with default value
-        chart_data = google.visualization.arrayToDataTable([
-            chart_data_labels,
-            [0, 0, 0]
-        ]);
+            // create data object with default value
+            chart_data = google.visualization.arrayToDataTable([
+                chart_data_labels,
+                [0, 0, 0]
+            ]);
 
-        // create options object with titles, colors, etc.
-        chart_options = {
-            title: "Exo Data",
-            hAxis: {
-            title: "Sample"
+            // create options object with titles, colors, etc.
+            chart_options = {
+                title: "Exo Data",
+                hAxis: {
+                title: "Sample"
+                }
+            };
+        }
+
+        let row_data = [sample_num++];
+        for (let i = 1; i < chart_data_labels.length; i++)
+        {
+            row_data.push(json_obj[chart_data_labels[i]]);
+        }
+
+        let row_num = chart_data.addRow(row_data);
+        if (row_num >= 100) {
+            chart_data.removeRow(0);
+        }
+        global_chart.draw(chart_data, chart_options);
+    }
+}
+
+
+var gif_ctrl = new SuperGif({ gif: document.getElementById("elbow_gif"), progressbar_height: 0 } );
+gif_ctrl.load();
+
+
+function moveElbow(json_obj) {
+    
+    let moved = false;
+    const vel = 5;
+    if (json_obj.hasOwnProperty("plot")){
+        if (json_obj.plot.hasOwnProperty("btn_extend")) {
+            if (json_obj.plot.btn_extend == 0) {
+                if (gif_ctrl.get_current_frame() < (gif_ctrl.get_length() - vel)) {
+                    gif_ctrl.move_relative(vel);
+                    moved = true;
+                }
             }
-        };
+        }
+        if (json_obj.plot.hasOwnProperty("btn_flex")) {
+            if (json_obj.plot.btn_flex == 0) {
+                if (gif_ctrl.get_current_frame() >  vel) {
+                    gif_ctrl.move_relative(-vel);
+                    moved = true;
+                }
+            }
+        }
     }
+    if (json_obj.hasOwnProperty("joint_angle") && !moved) {
+        let frame_num = Math.round(MAP(json_obj.joint_angle, 0, 4095, 0, gif_ctrl.get_length()));
+        // console.log(frame_num);
+        gif_ctrl.move_to(frame_num);
+    }
+}
 
-    let row_data = [sample_num++];
-    for (let i = 1; i < chart_data_labels.length; i++)
-    {
-        row_data.push(plot_json_obj[chart_data_labels[i]]);
-    }
 
-    let row_num = chart_data.addRow(row_data);
-    if (row_num >= 100) {
-        chart_data.removeRow(0);
-    }
-    global_chart.draw(chart_data, chart_options);
+function MAP(v, minIn, maxIn, minOut, maxOut) {
+    return ((v - minIn) * (maxOut - minOut) / (maxIn - minIn) + minOut);
 }
