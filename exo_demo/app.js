@@ -172,7 +172,7 @@ function drawChart(json_obj) {
             
         if (sample_num == 0) {
 
-            chart_data_labels = [ "Sample" ].concat(Object.keys(json_obj));
+            chart_data_labels = [ "Sample" ].concat(Object.keys(json_obj.plot));
 
             // create data object with default value
             chart_data = google.visualization.arrayToDataTable([
@@ -192,7 +192,7 @@ function drawChart(json_obj) {
         let row_data = [sample_num++];
         for (let i = 1; i < chart_data_labels.length; i++)
         {
-            row_data.push(json_obj[chart_data_labels[i]]);
+            row_data.push(json_obj.plot[chart_data_labels[i]]);
         }
 
         let row_num = chart_data.addRow(row_data);
@@ -208,9 +208,9 @@ var gif_ctrl = new SuperGif({ gif: document.getElementById("elbow_gif"), progres
 gif_ctrl.load();
 
 
+var last_angle = 0;
 function moveElbow(json_obj) {
     
-    let moved = false;
     const vel = 5;
     if (json_obj.hasOwnProperty("plot")){
         if (json_obj.plot.hasOwnProperty("btn_extend")) {
@@ -230,10 +230,14 @@ function moveElbow(json_obj) {
             }
         }
     }
-    if (json_obj.hasOwnProperty("joint_angle") && !moved) {
-        let frame_num = Math.round(MAP(json_obj.joint_angle, 0, 4095, 0, gif_ctrl.get_length()));
-        // console.log(frame_num);
-        gif_ctrl.move_to(frame_num);
+    if (json_obj.hasOwnProperty("joint_angle")) {
+        if ( Math.abs(last_angle - json_obj.joint_angle) > 5)
+        {
+            // let frame_num = Math.round(MAP(json_obj.joint_angle, 0, 4095, 0, gif_ctrl.get_length()));
+            let frame_num = Math.round(MAP(json_obj.joint_angle, 0, 4095, 0, 75));
+            gif_ctrl.move_to(frame_num);
+            last_angle = json_obj.joint_angle;
+        }
     }
 }
 
