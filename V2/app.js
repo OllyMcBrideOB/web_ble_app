@@ -1,3 +1,16 @@
+/**
+ * TODO
+ * 
+ * - Change read/write data packet sizes to use MTU size
+ * - Speed up file browser read
+ * - Allow files to be moved around within the file nav (i.e. drag from one dir to another)
+ * - Allow entire filesystem to be reset to default
+ * - Host TLS webapp to make it available (must be https to enable Web BLE)
+ * 
+ */
+
+
+
 /**< Create an instance of the GATT manager to allow us to communicate with a BLE Peripheral */
 let GATT = new GATTmanager();
 
@@ -37,6 +50,8 @@ document.getElementById("btn_connect").addEventListener("click", function() {
             console.log("Disconnecting");
             GATT.disconnect();
         }
+    } else {
+        printFileStatus("Web BLE is not available");
     }
 })
 
