@@ -73,147 +73,26 @@ header label {
     font-family: monospace;
 }
 
-/* Command Request */
-
-#commands_key{
-    font-size: 12px;
-    font-family: Arial;
-    padding-bottom: 2px;
-}
-
-.container_requests {
-    display: flex;
-    margin-top: 8px;
-}
-
-.label_0x {
-    font-size: 14px;
-    padding-top: 2px;
-    padding-right: 2px;
-}
-
-.cmd_field,.len_field {
-    width: 30px
-}
-
-.payload_field {
-    flex-grow: 1;
-}
-
-.btn_enter_request {
-    margin-left: 4px;
-}
+/* Exo */
 
 
-/* File Manager */
 
-#fm_header {
-    display: flex;
-    flex-direction: row;
-}
-
-#label_browse_or {
-    margin-left: 30px;
-    margin-right: 30px;
-}
-
-#fm_body {
-    display: flex;
-    flex-direction: row;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-#fm_nav {
-    width: 30%;
-    margin-right: 5px;
-    height: 300px;
-    display: flex;
-    flex-direction: column;
-}
-
-.nav_element{
-    display: flex;
-    flex-direction: row;
-}
-
-.nav_element:hover {
-    background-color: rgba(100, 159, 248, 0.379);
-}
-
-.nav_element:active {
-    background-color: rgb(100, 159, 248);
-}
-
-.label_nav_element{
+#graph_elbow_container {
     width: 100%;
+    height: 0%;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    /* background-color: blueviolet; */
 }
 
-.nav_element:hover > .nav_delete {
-    visibility: visible;
+#elbow_gif {
+    /* float: left; */
+    
 }
 
-.nav_element:active > .nav_delete {
-    visibility: visible;
-}
-
-.nav_delete {
-    color: red;
-    font-weight: 900;
-    font-family: DejaVu Sans Mono;
-    font-size: 14px;
-    visibility: hidden;
-}
-
-#fm_viewer {
+#chart_div {
+    float: left;
+    /* width: 1200px; */
+    height: 500px;
     width: 70%;
-    height: 300px;
-}
-
-#fm_file_info {
-    display: flex;
-    flex-direction: row;
-}
-
-#fm_filename {
-    width: 31%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-#fm_send_download_clear {
-    width: 40%;
-}
-
-#fm_file_size {
-    width: 30%;
-    text-align: right;
-}
-
-#fm_status_box {
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-#fm_transfer_info {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-}
-
-#fm_transfer_dur {
-    width: 25%;
-}
-
-#fm_transfer_progress {
-    width: 40%;
-}
-
-#fm_transfer_size {
-    width: 35%;
-    text-align: right;
+    max-height: 100%;
 }

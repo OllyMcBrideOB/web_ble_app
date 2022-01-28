@@ -127,9 +127,14 @@ function writeToCommandTerminal(val, tx_rx="none") {
         }
     }
     
-
+    // discard old console output if it's > 10000 chars
+    let console_element = document.getElementById("label_cmd_responses");
+    if (console_element.innerHTML.length > 10000)
+    {
+        console_element.innerHTML = console_element.innerHTML.slice(-10000);
+    }
     // write the message to the Command Terminal component
-    document.getElementById("label_cmd_responses").innerHTML += getTimestampStr() + " " + tx_rx_indicator + val_str + "<br>";
+    console_element.innerHTML += getTimestampStr() + " " + tx_rx_indicator + val_str + "<br>";
 
     // scroll to the bottom of the terminal
     let response_label_div = document.getElementById("cmd_responses_terminal");
@@ -159,6 +164,8 @@ google.charts.load("current", {
 // set callback function when api loaded
 google.charts.setOnLoadCallback(function() {
     global_chart = new google.visualization.LineChart(document.getElementById("chart_div"));
+
+    global_chart.draw(google.visualization.arrayToDataTable([ [0, 0]], { title: "Exo Data" }));
 });
 
 
@@ -234,7 +241,8 @@ function moveElbow(json_obj) {
         if ( Math.abs(last_angle - json_obj.joint_angle) > 5)
         {
             // let frame_num = Math.round(MAP(json_obj.joint_angle, 0, 4095, 0, gif_ctrl.get_length()));
-            let frame_num = Math.round(MAP(json_obj.joint_angle, 0, 4095, 0, 75));
+            // let frame_num = Math.round(MAP(json_obj.joint_angle, 0, 4095, 0, 75));
+            let frame_num = Math.round(MAP(json_obj.joint_angle, 2800, 3900, 0, 75));
             gif_ctrl.move_to(frame_num);
             last_angle = json_obj.joint_angle;
         }

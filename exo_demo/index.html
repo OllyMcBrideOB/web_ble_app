@@ -18,24 +18,27 @@
     </div>
 </header>
 <body>
-    <fieldset id="card_commands" class="card">
-        <legend>Commands</legend>
-        <div id="commands_key">
-            <label>Tx: =></label>
-            <label>Rx: <=</label>
-            <button id="btn_clear_cmds">Clear</button>
-        </div>
-        <div id="cmd_responses_terminal" class="scroll_box">
-            <label id="label_cmd_responses"></label>
-        </div>
-        </div>
-    </fieldset>
+  <div id="graph_elbow_container">
+    <div id="chart_div"></div>
+    <img id="elbow_gif" src="./elbow.gif" rel:animated_src="./elbow.gif" rel:auto_play="0" rel:rubbable="1" />
+  </div>
+
+  <fieldset id="card_commands" class="card">
+      <legend>Commands</legend>
+      <div id="commands_key">
+          <label>Tx: =></label>
+          <label>Rx: <=</label>
+          <button id="btn_clear_cmds">Clear</button>
+      </div>
+      <div id="cmd_responses_terminal" class="scroll_box">
+          <label id="label_cmd_responses"></label>
+      </div>
+      </div>
+  </fieldset>
 
 
 
-      <div id="chart_div"></div>
 
-      <img id="elbow_gif" src="./elbow.gif" rel:animated_src="./elbow.gif" rel:auto_play="0" rel:rubbable="1" />
 
 
 </body>
