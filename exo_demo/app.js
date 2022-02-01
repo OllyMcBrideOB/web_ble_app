@@ -241,8 +241,12 @@ function moveElbow(json_obj) {
         if ( Math.abs(last_angle - json_obj.joint_angle) > 5)
         {
             // let frame_num = Math.round(MAP(json_obj.joint_angle, 0, 4095, 0, gif_ctrl.get_length()));
-            // let frame_num = Math.round(MAP(json_obj.joint_angle, 0, 4095, 0, 75));
-            let frame_num = Math.round(MAP(json_obj.joint_angle, 2800, 3900, 0, 75));
+
+            min_angle = 1000;
+            max_angle = 2400;
+            const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+            const angle = clamp(json_obj.joint_angle, min_angle, max_angle)
+            let frame_num = Math.round(MAP(angle, min_angle, max_angle, 0, 75));
             gif_ctrl.move_to(frame_num);
             last_angle = json_obj.joint_angle;
         }
