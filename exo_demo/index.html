@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web BLE - Command Terminal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" type="image/jpg" href="bt_favicon.png"/>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+</head>
+<header>
+    <div>
+        <button id="btn_connect">Connect</button>
+        <label>Connected Device:</label>
+        <label id="label_dev">None</label>
+    </div>
+</header>
+<body>
+  <div id="graph_elbow_container">
+    <div id="chart_div"></div>
+    <img id="elbow_gif" src="./elbow.gif" rel:animated_src="./elbow.gif" rel:auto_play="0" rel:rubbable="1" />
+  </div>
+
+  <fieldset id="card_commands" class="card">
+      <legend>Commands</legend>
+      <div id="commands_key">
+          <label>Tx: =></label>
+          <label>Rx: <=</label>
+          <button id="btn_clear_cmds">Clear</button>
+      </div>
+      <div id="cmd_responses_terminal" class="scroll_box">
+          <label id="label_cmd_responses"></label>
+      </div>
+      </div>
+  </fieldset>
+
+
+
+
+
+
+</body>
+<script src="libgif.js"></script>
+<script src="rubbable.js"></script>
+<script src="uuid.js"></script>
+<script src="converters.js"></script>
+<script src="gatt.js"></script>
+<script src="app.js"></script>
+</html>

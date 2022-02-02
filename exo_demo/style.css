@@ -1,0 +1,98 @@
+/**< Defaults */
+
+button,input[type=submit] {
+    border: 1px solid gray;
+    border-radius: 3px;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+legend {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.disable-select {
+    user-select: none; /* supported by Chrome and Opera */
+   -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+   -moz-user-select: none; /* Firefox */
+   -ms-user-select: none; /* Internet Explorer/Edge */
+}
+
+
+/* Header */
+
+header {
+    background-color: rgba(219, 222, 223, 0.384);
+    margin-bottom: 20px;
+}
+
+header div {
+    padding: 10px;
+}
+
+header label {
+    padding-left: 20px;
+}
+
+#btn_connect {
+    width: 90px;
+    height: 30px;
+    background-color: rgba(161, 158, 158, 0.479);
+    border-style: none;
+}
+
+#btn_connect:hover {
+    background-color: rgba(161, 158, 158, 0.658);
+}
+
+#btn_connect:active {
+    background-color: rgba(161, 158, 158, 0.804);
+}
+
+
+/* Card */
+
+.card {
+    max-width: 700px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    box-shadow: 2px 2px rgba(128, 128, 128, 0.226);
+    margin-bottom: 20px;
+}
+
+.scroll_box {
+    border: 1px solid gray;
+    height: 150px;
+    word-wrap:break-word;
+    overflow-y: scroll;
+    font-family: monospace;
+}
+
+/* Exo */
+
+
+
+#graph_elbow_container {
+    width: 100%;
+    height: 0%;
+    overflow: hidden;
+    /* background-color: blueviolet; */
+}
+
+#elbow_gif {
+    /* float: left; */
+    
+}
+
+#chart_div {
+    float: left;
+    /* width: 1200px; */
+    height: 500px;
+    width: 70%;
+    max-height: 100%;
+}
