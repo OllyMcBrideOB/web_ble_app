@@ -362,7 +362,17 @@ class FileTransfer {
  */
 function printFileStatus(str) {
     console.log(str)
-    document.getElementById("label_status_box").innerHTML += str + "<br>";
+
+    // discard old console output if it's > 10000 chars
+    let console_element = document.getElementById("label_status_box");
+    if (console_element.innerHTML.length > 10000)
+    {
+        console_element.innerHTML = console_element.innerHTML.slice(-10000);
+    }
+    // write the message to the Command Terminal component
+    console_element.innerHTML += str + "<br>";
+
+    // scroll to the bottom of the terminal
     let scrollbox = document.getElementById("fm_status_box");
     scrollbox.scrollTop = scrollbox.scrollHeight;
 }

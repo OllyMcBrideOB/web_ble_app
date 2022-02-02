@@ -249,8 +249,14 @@ function writeToCommandTerminal(val, tx_rx="none") {
         }
     }
 
+    // discard old console output if it's > 10000 chars
+    let console_element = document.getElementById("label_cmd_responses");
+    if (console_element.innerHTML.length > 10000)
+    {
+        console_element.innerHTML = console_element.innerHTML.slice(-10000);
+    }
     // write the message to the Command Terminal component
-    document.getElementById("label_cmd_responses").innerHTML += getTimestampStr() + " " + tx_rx_indicator + val_str + "<br>";
+    console_element.innerHTML += getTimestampStr() + " " + tx_rx_indicator + val_str + "<br>";
 
     // scroll to the bottom of the terminal
     let response_label_div = document.getElementById("cmd_responses_terminal");
