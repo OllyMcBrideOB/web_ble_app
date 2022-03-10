@@ -21,6 +21,9 @@ let fileBrowser = new FileBrowser(document.getElementById("fm_nav"));
 let standard_req_msg = new Message();
 let large_req_msg = new Message();
 
+/**< Flag to enable/disable ASCII printout in the command response terminal */
+let en_ASCII_cmd_resp = document.getElementById("checkbox_cmd_ascii").checked;
+
 /**< When the Connect/Disconnect button is clicked */
 document.getElementById("btn_connect").addEventListener("click", function() {
     // if web BLE is available in this browser
@@ -62,6 +65,13 @@ document.getElementById("btn_connect").addEventListener("click", function() {
  */
 document.getElementById("btn_clear_cmds").addEventListener("click", function(event) {
     document.getElementById("label_cmd_responses").innerHTML = "";
+});
+
+/**
+ * If the Commands 'View as ASCII' checkbox is changed, enable ASCII output in terminal
+ */
+document.getElementById("checkbox_cmd_ascii").addEventListener("click", function(event) {
+    en_ASCII_cmd_resp = event.target.checked;
 });
 
 /**< If the Standard Request Cmd is valid, enable the Enter button, else disable it */
@@ -182,7 +192,7 @@ function onConnectionComplete() {
     
     subscribeToCharacteristics();
 
-    fileBrowser.ls();
+    // fileBrowser.ls();
 }
 
 /**
@@ -214,6 +224,10 @@ function subscribeToCharacteristics() {
         // convert the ArrayBuffer to a HexStr
         let rx_hex_str = new HexStr().fromUint8Array(new Uint8Array(event.target.value.buffer));
         writeToCommandTerminal(rx_hex_str, "rx")
+
+        if (en_ASCII_cmd_resp) {
+            writeToCommandTerminal(rx_hex_str, "rx", en_ASCII_cmd_resp)
+        }
     })
 };
 
@@ -221,8 +235,9 @@ function subscribeToCharacteristics() {
  * Write a message to the command terminal (including the rx/tx indicator)
  * @param {val} val A value to write to the command terminal
  * @param {"tx","rx","none"} tx_rx String to indicate if it is a tx or rx message
+ * @param {bool} print_msg_as_ascii True to write the message payload in a UTF8 representation, else use Hex
  */
-function writeToCommandTerminal(val, tx_rx="none") {
+function writeToCommandTerminal(val, tx_rx="none", print_msg_as_ascii=false) {
     // determine the indicator direction
     const tx_rx_indicator = (tx_rx == "tx") ? "=> " : (tx_rx == "rx") ? "<= " : ""; 
     let val_str = "";
@@ -232,7 +247,11 @@ function writeToCommandTerminal(val, tx_rx="none") {
         // convert the hex_str to a message
         let msg = new Message().fromHexStr(val);
 
-        val_str = msg.toString("-");
+        if (print_msg_as_ascii) {
+            val_str = msg.toUTF8String();
+        } else {
+            val_str = msg.toString();
+        }
     } else if (val instanceof Message) {
         val_str = val.toString();
     } else {

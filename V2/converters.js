@@ -50,15 +50,16 @@ class HexStr
         }
         return str;
     }
-
+    
     /**< Get the hex array as a string of UTF8 characters
+     * @param charSep   Seperator between chars
      * @returns str     Get the hex array as a string of UTF8 characters (e.g. 0x61 = 'a')
      */
-     toUTF8String() {
+     toUTF8String(charSep = "") {
         let str = "";
         for (let i = 0; i < this.rawArray.length; i++) {
             // convert the byte value to a it's 2-digit hex representation
-            str += String.fromCharCode(this.rawArray[i]);
+            str += String.fromCharCode(this.rawArray[i]) + charSep;
         }
         return str;
     }

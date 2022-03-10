@@ -29,6 +29,15 @@ class Message {
                 this.payload.toString("-")
     }
 
+    /**< Get the full message (cmd + len + payload) as a string, but print the payload as a UTF8 string
+     * @returns The full message as a string
+     */
+         toUTF8String() {
+            return this.cmd.toString() + " " +
+                    this.payload_len.toString() + " " +
+                    this.payload.toUTF8String()
+        }
+
     /**
      * Get the message as a HexStr
      * @returns The message as a HexStr
