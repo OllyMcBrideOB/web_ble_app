@@ -111,11 +111,23 @@ document.getElementById("l_request_cmd").addEventListener("input", function(even
 document.getElementById("s_request_payload").addEventListener("input", function(event) {
     document.getElementById("l_request_payload").value = event.target.value;
 
+    // update the s & l payload lengths
+    let payload_len = new HexStr().fromNumber(Math.floor(event.target.value.length/2), "uint16");
+    document.getElementById("s_request_len").value = payload_len.toString();
+    payload_len = new HexStr().fromNumber(Math.floor(event.target.value.length/2) + 2, "uint16");
+    document.getElementById("l_request_len").value = payload_len.toString();
+
 });
 
 /**< If the Large Request payload is valid, enable the Enter button, else disable it */
 document.getElementById("l_request_payload").addEventListener("input", function(event) {
     document.getElementById("s_request_payload").value = event.target.value;
+
+    // update the s & l payload lengths
+    let payload_len = new HexStr().fromNumber(Math.floor(event.target.value.length/2), "uint16");
+    document.getElementById("s_request_len").value = payload_len.toString();
+    payload_len = new HexStr().fromNumber(Math.floor(event.target.value.length/2) + 2, "uint16");
+    document.getElementById("l_request_len").value = payload_len.toString();
 });
 
 /**< If the Standard Request 'Enter' button is clicked */
