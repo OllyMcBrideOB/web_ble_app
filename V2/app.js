@@ -384,6 +384,7 @@ function isTextFile(file_type) {
         case ".json":
         case "text/plain":
         case "application/vnd.ms-excel":
+        case "application/json":
             return true;
             break;
         default:
