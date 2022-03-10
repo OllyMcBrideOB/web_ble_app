@@ -28,20 +28,20 @@
         <div id="cmd_responses_terminal" class="scroll_box">
             <label id="label_cmd_responses"></label>
         </div>
-        <div id="cmd_requests"  title="Command as Little Endian">
+        <div id="cmd_requests">
             <div id="requests_small" class="container_requests">
                 <label class="label_0x">0x</label>
-                <input type="text" id="s_request_cmd" class="cmd_field" placeholder="Cmd">
-                <input type="text" id="s_request_len" class="len_field" disabled value="0000">
-                <input type="text" id="s_request_payload" class="payload_field" placeholder="Payload" value="">
+                <input type="text" id="s_request_cmd" class="cmd_field" placeholder="Cmd" title="Command (Little Endian)">
+                <input type="text" id="s_request_len" class="len_field" disabled value="0000" title="Payload Length (Little Endian)">
+                <input type="text" id="s_request_payload" class="payload_field" placeholder="Standard Payload" value="">
                 <input type="submit" id="s_request_enter" class="btn_enter_request" disabled value="Enter">
             </div>
             <div id="requests_large" class="container_requests">
                 <label class="label_0x">0x</label>
-                <input type="text" id="l_request_cmd" class="cmd_field" placeholder="Cmd">
-                <input type="text" id="l_request_len" class="len_field" disabled value="0400">
-                <input type="text" id="l_request_packet_num" class="len_field" value="0000" placeholder="Packet Number">
-                <input type="text" id="l_request_payload" class="payload_field" placeholder="Payload">
+                <input type="text" id="l_request_cmd" class="cmd_field" placeholder="Cmd" title="Command (Little Endian)">
+                <input type="text" id="l_request_len" class="len_field" disabled value="0400" title="Payload Length (Little Endian)">
+                <input type="text" id="l_request_packet_num" class="len_field" value="0000" title="Packet Number">
+                <input type="text" id="l_request_payload" class="payload_field" placeholder="Large Payload Chunk">
                 <input type="submit" id="l_request_enter" class="btn_enter_request" disabled value="Enter">
             </div>
         </div>
