@@ -101,13 +101,17 @@ document.addEventListener("keyup", function(event) {
 
 /**< If the Standard Request Cmd is valid, enable the Enter button, else disable it */
 document.getElementById("s_request_cmd").addEventListener("input", function(event) {
-    document.getElementById("s_request_enter").disabled = !isValidHexChars(event.target.value, 4);
+    const valid = isValidHexChars(event.target.value, 4);
+    document.getElementById("s_request_enter").disabled = !valid;
+    document.getElementById("l_request_enter").disabled = !valid;
     document.getElementById("l_request_cmd").value = event.target.value;
 });
 
 /**< If the Large Request Cmd is valid, enable the Enter button, else disable it */
 document.getElementById("l_request_cmd").addEventListener("input", function(event) {
-    document.getElementById("l_request_enter").disabled = !isValidHexChars(event.target.value, 4);
+    const valid = isValidHexChars(event.target.value, 4);
+    document.getElementById("s_request_enter").disabled = !valid;
+    document.getElementById("l_request_enter").disabled = !valid;
     document.getElementById("s_request_cmd").value = event.target.value;
 });
 
@@ -310,7 +314,7 @@ function subscribeToCharacteristics() {
     // if it's a HexStr, convert it to a msg
     if (val instanceof HexStr) {
         // convert the hex_str to a message
-        let val = new Message().fromHexStr(val);
+        val = new Message().fromHexStr(val);
     } 
     
     if (val instanceof Message) {
