@@ -87,7 +87,11 @@ document.addEventListener("keyup", function(event) {
         
                 GATT.GATTtable.NRTservice.NRTRequest.write(tx_msg);
         
-                writeToCommandTerminal(tx_msg, "tx")
+                writeToCommandTerminal(tx_msg, "tx");
+
+                if (en_ASCII_cmd_resp) {
+                    writeToCommandTerminal(tx_msg, "ascii", en_ASCII_cmd_resp)
+                }
             } else {
                 writeToCommandTerminal("No BLE Device Connected")
             }
@@ -139,7 +143,31 @@ document.getElementById("s_request_enter").addEventListener("click", function(ev
 
         GATT.GATTtable.NRTservice.NRTRequest.write(tx_msg);
 
-        writeToCommandTerminal(tx_msg, "tx")
+        writeToCommandTerminal(tx_msg, "tx");
+
+        if (en_ASCII_cmd_resp) {
+            writeToCommandTerminal(tx_msg, "ascii", en_ASCII_cmd_resp)
+        }
+    } else {
+        writeToCommandTerminal("No BLE Device Connected")
+    }
+});
+
+/**< If the Large Request 'Enter' button is clicked */
+document.getElementById("l_request_enter").addEventListener("click", function(event) {
+    if (GATT.isConnected()) {
+        let tx_msg = new Message(document.getElementById("l_request_cmd").value, 
+                                document.getElementById("l_request_packet_num").value + 
+                                document.getElementById("l_request_payload").value);
+        tx_msg.print();
+
+        GATT.GATTtable.NRTservice.NRTLargeRequest.write(tx_msg);
+
+        writeToCommandTerminal(tx_msg, "tx");
+
+        if (en_ASCII_cmd_resp) {
+            writeToCommandTerminal(tx_msg, "ascii", en_ASCII_cmd_resp);
+        }
     } else {
         writeToCommandTerminal("No BLE Device Connected")
     }
@@ -274,23 +302,23 @@ function subscribeToCharacteristics() {
  * @param {"tx","rx","none"} tx_rx String to indicate if it is a tx or rx message
  * @param {bool} print_msg_as_ascii True to write the message payload in a UTF8 representation, else use Hex
  */
-function writeToCommandTerminal(val, tx_rx="none", print_msg_as_ascii=false) {
+ function writeToCommandTerminal(val, tx_rx="none", print_msg_as_ascii=false) {
     // determine the indicator direction
     const tx_rx_indicator = (tx_rx == "tx") ? "=> " : (tx_rx == "rx") ? "<= " : (tx_rx == "ascii") ? "^^ " : ""; 
     let val_str = "";
 
-    // convert the value to a printable string
+    // if it's a HexStr, convert it to a msg
     if (val instanceof HexStr) {
         // convert the hex_str to a message
-        let msg = new Message().fromHexStr(val);
-
+        let val = new Message().fromHexStr(val);
+    } 
+    
+    if (val instanceof Message) {
         if (print_msg_as_ascii) {
-            val_str = msg.toUTF8String();
+            val_str = val.toUTF8String();
         } else {
-            val_str = msg.toString();
+            val_str = val.toString();
         }
-    } else if (val instanceof Message) {
-        val_str = val.toString();
     } else {
         switch (typeof val) {
             case "string":
