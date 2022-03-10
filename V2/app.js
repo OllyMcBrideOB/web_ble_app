@@ -239,6 +239,10 @@ function subscribeToCharacteristics() {
         // convert the ArrayBuffer to a HexStr
         let rx_hex_str = new HexStr().fromUint8Array(new Uint8Array(event.target.value.buffer));
         writeToCommandTerminal(rx_hex_str, "rx")
+
+        if (en_ASCII_cmd_resp) {
+            writeToCommandTerminal(rx_hex_str, "ascii", en_ASCII_cmd_resp)
+        }
     })
     // subscribe to the NRT large response char
     GATT.GATTtable.NRTservice.NRTLargeResponse.onValueChange( function(event) {      
@@ -247,7 +251,7 @@ function subscribeToCharacteristics() {
         writeToCommandTerminal(rx_hex_str, "rx")
 
         if (en_ASCII_cmd_resp) {
-            writeToCommandTerminal(rx_hex_str, "rx", en_ASCII_cmd_resp)
+            writeToCommandTerminal(rx_hex_str, "ascii", en_ASCII_cmd_resp)
         }
     })
 };
@@ -260,7 +264,7 @@ function subscribeToCharacteristics() {
  */
 function writeToCommandTerminal(val, tx_rx="none", print_msg_as_ascii=false) {
     // determine the indicator direction
-    const tx_rx_indicator = (tx_rx == "tx") ? "=> " : (tx_rx == "rx") ? "<= " : ""; 
+    const tx_rx_indicator = (tx_rx == "tx") ? "=> " : (tx_rx == "rx") ? "<= " : (tx_rx == "ascii") ? "^^ " : ""; 
     let val_str = "";
 
     // convert the value to a printable string
