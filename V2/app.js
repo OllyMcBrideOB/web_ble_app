@@ -74,6 +74,27 @@ document.getElementById("checkbox_cmd_ascii").addEventListener("click", function
     en_ASCII_cmd_resp = event.target.checked;
 });
 
+/*
+ * If the enter key is pressed whilst interacting with the Commands inputs, press the Enter button
+ */
+document.addEventListener("keyup", function(event) {
+    if (event.keyCode === 13) {
+        if (document.getElementById("card_commands").contains(document.activeElement)){
+            if (GATT.isConnected()) {
+                let tx_msg = new Message(document.getElementById("s_request_cmd").value, 
+                                        document.getElementById("s_request_payload").value);
+                tx_msg.print();
+        
+                GATT.GATTtable.NRTservice.NRTRequest.write(tx_msg);
+        
+                writeToCommandTerminal(tx_msg, "tx")
+            } else {
+                writeToCommandTerminal("No BLE Device Connected")
+            }
+        }
+    }
+});
+
 /**< If the Standard Request Cmd is valid, enable the Enter button, else disable it */
 document.getElementById("s_request_cmd").addEventListener("input", function(event) {
     document.getElementById("s_request_enter").disabled = !isValidHexChars(event.target.value, 4);
