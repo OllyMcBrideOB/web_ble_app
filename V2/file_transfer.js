@@ -157,12 +157,13 @@ class FileTransfer {
          */
         let response_parser = function (response_msg){
             // confirm response payload length is valid
-            if (response_msg.payload.length == 4) {
+            if (response_msg.payload.length == 6) {
                 // parse response payload
                 file.id = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 0, 1));
                 file.status = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 1, 1));
-                file.size = Number(new Uint16Array(response_msg.payload.rawArray.buffer, 2, 1));
+                file.size = new Uint32Array(response_msg.payload.rawArray.buffer.slice(-4))[0];
                 
+                setFileSize(file.size)
                 printFileStatus("FS_OPEN file_id: 0x" + file.id.toString(16).padStart(2, "0") + 
                                 "\tstatus: " + fileStatusToString(file.status) + " (0x" + file.status.toString(16).padStart(2, "0") + ") " +
                                 "\tsize: " + file.size.toString() + " bytes")
@@ -219,7 +220,8 @@ class FileTransfer {
                 printFileStatus("FS_READ rx_file_id: 0x" + rx_file_id.toString(16).padStart(2, "0") + 
                                 "\tstatus: " + fileStatusToString(file_status) + " (0x" + file_status.toString(16).padStart(2, "0") + ") " +
                                 "\tn_read: " + n_read.toString() + " bytes" + 
-                                "\trx_file_data.length: " + rx_file_data.length)
+                                "\trx_file_data.length: " + rx_file_data.length +
+                                "\tpacket: " + packet_num);
 
                 // printFileStatus("FS_READ data: '" + rx_file_data.toString("-") + "'");
 
@@ -241,7 +243,7 @@ class FileTransfer {
 
         // generate message to read the file
         const file_id_buf = new HexStr().fromNumber(file_id, "uint8");   
-        const file_data_size = new HexStr().fromNumber(file_size, "uint16")
+        const file_data_size = new HexStr().fromNumber(file_size, "uint32")
         const payload = new HexStr().append(file_id_buf, file_data_size);
 
         const request_msg = new Message("FS_READ", payload);
@@ -279,7 +281,8 @@ class FileTransfer {
                 
                 printFileStatus("FS_WRITE file_id: 0x" + rx_file_id.toString(16).padStart(2, "0") + 
                                 "\tstatus: " + fileStatusToString(file_status) + " (0x" + file_status.toString(16).padStart(2, "0") + ") " +
-                                "\tsize: " + n_written.toString() + " bytes")
+                                "\tsize: " + n_written.toString() + " bytes" +
+                                "\tpacket: " + packet_num)
                
                 total_written += n_written;
                 document.getElementById("label_file_size_transferred").innerHTML = total_written;
