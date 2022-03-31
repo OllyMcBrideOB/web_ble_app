@@ -163,7 +163,6 @@ class FileTransfer {
                 file.status = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 1, 1));
                 file.size = new Uint32Array(response_msg.payload.rawArray.buffer.slice(-4))[0];
                 
-                setFileSize(file.size)
                 printFileStatus("FS_OPEN file_id: 0x" + file.id.toString(16).padStart(2, "0") + 
                                 "\tstatus: " + fileStatusToString(file.status) + " (0x" + file.status.toString(16).padStart(2, "0") + ") " +
                                 "\tsize: " + file.size.toString() + " bytes")
@@ -195,6 +194,7 @@ class FileTransfer {
      */
     async #do_read(file_id, file_size) {
         // printFileStatus("FileTransfer::file_read()");
+        setFileSize(file_size)
 
         // TODO, enable multi-packet reads
         
@@ -212,8 +212,8 @@ class FileTransfer {
                 const packet_num = Number(new Uint16Array(response_msg.payload.rawArray.buffer, 0, 1));
                 const rx_file_id = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 2, 1));
                 const file_status = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 3, 1));
-                const n_read = Number(new Uint16Array(response_msg.payload.rawArray.buffer, 4, 1));
-                const rx_file_buf = new Uint8Array(response_msg.payload.rawArray.buffer, 5);
+                const n_read = Number(new Uint32Array(response_msg.payload.rawArray.buffer, 4, 1));
+                const rx_file_buf = new Uint8Array(response_msg.payload.rawArray.buffer, 8);
                 const rx_file_data = new HexStr().fromUint8Array(rx_file_buf.subarray(5, 5 + n_read));
                 
 
@@ -262,6 +262,7 @@ class FileTransfer {
      */
      async #do_write(file_id, file_data) {
         printFileStatus("FileTransfer::file_write()");
+        setFileSize(file_data.length)
         
         let packet_counter = 0;
         let total_written = 0;
@@ -273,16 +274,15 @@ class FileTransfer {
          */
         let response_parser = (response_msg) => {
             // confirm response payload length is valid
-            if (response_msg.payload.length == 4) {
+            if (response_msg.payload.length == 6) {
                 // parse response payload
                 const rx_file_id = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 0, 1));
                 const file_status = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 1, 1));
-                const n_written = Number(new Uint16Array(response_msg.payload.rawArray.buffer, 2, 1));
+                const n_written = new Uint32Array(response_msg.payload.rawArray.buffer.slice(-4))[0];
                 
                 printFileStatus("FS_WRITE file_id: 0x" + rx_file_id.toString(16).padStart(2, "0") + 
                                 "\tstatus: " + fileStatusToString(file_status) + " (0x" + file_status.toString(16).padStart(2, "0") + ") " +
-                                "\tsize: " + n_written.toString() + " bytes" +
-                                "\tpacket: " + packet_num)
+                                "\tsize: " + n_written.toString() + " bytes")
                
                 total_written += n_written;
                 document.getElementById("label_file_size_transferred").innerHTML = total_written;
@@ -308,7 +308,7 @@ class FileTransfer {
             // generate message to write the file
             const packet_num = new HexStr().fromNumber(packet_counter++, "uint16");    
             const file_id_buf = new HexStr().fromNumber(file_id, "uint8");   
-            const file_data_size = new HexStr().fromNumber(data_chunk.length, "uint16")
+            const file_data_size = new HexStr().fromNumber(data_chunk.length, "uint32")
             const payload = new HexStr().append(packet_num, file_id_buf, file_data_size, data_chunk);
 
             const write_file_msg = new Message("FS_WRITE", payload);
