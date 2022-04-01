@@ -13,6 +13,10 @@
         <button id="btn_connect">Connect</button>
         <label>Connected Device:</label>
         <label id="label_dev">None</label>
+        <label>Firmware:</label>
+        <label id="label_fw">Unknown</label>
+        <label>Bootloader:</label>
+        <label id="label_bootloader">Unknown</label>
     </div>
 </header>
 <body>
@@ -24,7 +28,7 @@
             <label>ASCII: ^^</label>
             <button id="btn_clear_cmds">Clear</button>
             <label>View as ASCII:</label>
-            <input type="checkbox" name="checkbox_cmd_ascii" id="checkbox_cmd_ascii" checked>
+            <input type="checkbox" name="checkbox_cmd_ascii" id="checkbox_cmd_ascii">
         </div>
         <div id="cmd_responses_terminal" class="scroll_box">
             <label id="label_cmd_responses"></label>

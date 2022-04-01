@@ -271,12 +271,14 @@ function onDisconnect(event) {
     document.getElementById("btn_connect").innerHTML = "Connect"
     document.getElementById("btn_remote_refresh").disabled = true;
     document.getElementById("btn_file_send").disabled = true;
+    document.getElementById("label_fw").innerHTML = "Unkown";
+    document.getElementById("label_bootloader").innerHTML = "Unkown";
 }
 
 /**
  *  Called after successful connection. Allows characteristics to be subscribed to
  */
-function subscribeToCharacteristics() {
+async function subscribeToCharacteristics() {
    
     // subscribe to the NRT response char
     GATT.GATTtable.NRTservice.NRTResponse.onValueChange( function(event) {      
@@ -293,10 +295,24 @@ function subscribeToCharacteristics() {
         // convert the ArrayBuffer to a HexStr
         let rx_hex_str = new HexStr().fromUint8Array(new Uint8Array(event.target.value.buffer));
         writeToCommandTerminal(rx_hex_str, "rx")
-
+        
         if (en_ASCII_cmd_resp) {
             writeToCommandTerminal(rx_hex_str, "ascii", en_ASCII_cmd_resp)
         }
+    })
+
+    // get the firmware version and display it in the nav bar
+    let get_fw_ver_msg = new Message("GET_HERO_BLE_FIRMWARE_VER", new HexStr());
+    writeThenGetResponse(get_fw_ver_msg, "standard", "standard", function(response_msg)
+    {
+        document.getElementById("label_fw").innerHTML = response_msg.payload.toUTF8String();
+
+        // get the bootloader version and display it in the nav bar
+        let get_bl_ver_msg = new Message("GET_HERO_BLE_BOOTLOADER_VER", new HexStr());
+        writeThenGetResponse(get_bl_ver_msg, "standard", "standard", function(response_msg)
+        {
+            document.getElementById("label_bootloader").innerHTML = response_msg.payload.toUTF8String();
+        })
     })
 };
 
