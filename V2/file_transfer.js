@@ -207,15 +207,14 @@ class FileTransfer {
          */
         let response_parser = (response_msg) => {
             // confirm response payload length is valid
-            if (response_msg.payload.length >= 4) {
+            if (response_msg.payload.length >= 8) {
                 // parse response payload
                 const packet_num = Number(new Uint16Array(response_msg.payload.rawArray.buffer, 0, 1));
                 const rx_file_id = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 2, 1));
                 const file_status = Number(new Uint8Array(response_msg.payload.rawArray.buffer, 3, 1));
                 const n_read = Number(new Uint32Array(response_msg.payload.rawArray.buffer, 4, 1));
-                const rx_file_buf = new Uint8Array(response_msg.payload.rawArray.buffer, 8);
-                const rx_file_data = new HexStr().fromUint8Array(rx_file_buf.subarray(5, 5 + n_read));
-                
+                const rx_file_buf = new Uint8Array(response_msg.payload.rawArray.buffer, 7);
+                const rx_file_data = new HexStr().fromUint8Array(rx_file_buf.subarray(7, 7 + n_read));
 
                 printFileStatus("FS_READ rx_file_id: 0x" + rx_file_id.toString(16).padStart(2, "0") + 
                                 "\tstatus: " + fileStatusToString(file_status) + " (0x" + file_status.toString(16).padStart(2, "0") + ") " +
