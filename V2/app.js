@@ -374,9 +374,9 @@ async function subscribeToCharacteristics() {
 
     // discard old console output if it's > 10000 chars
     let console_element = document.getElementById("label_cmd_responses");
-    if (console_element.innerHTML.length > 10000)
+    if (console_element.innerHTML.length > 5000)
     {
-        console_element.innerHTML = console_element.innerHTML.slice(-10000);
+        console_element.innerHTML = console_element.innerHTML.slice(-5000);
     }
     // write the message to the Command Terminal component
     console_element.innerHTML += getTimestampStr() + " " + tx_rx_indicator + " " + val_str + "<br>";
