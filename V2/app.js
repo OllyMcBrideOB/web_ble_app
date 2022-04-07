@@ -319,12 +319,19 @@ async function subscribeToCharacteristics() {
 /**
  * Write a message to the command terminal (including the rx/tx indicator)
  * @param {val} val A value to write to the command terminal
- * @param {"tx","rx","none"} tx_rx String to indicate if it is a tx or rx message
+ * @param {"tx","rx","ascii","grip","none"} tx_rx String to indicate if it is a tx or rx message
  * @param {bool} print_msg_as_ascii True to write the message payload in a UTF8 representation, else use Hex
  */
  function writeToCommandTerminal(val, tx_rx="none", print_msg_as_ascii=false) {
-    // determine the indicator direction
-    const tx_rx_indicator = (tx_rx == "tx") ? "=> " : (tx_rx == "rx") ? "<= " : (tx_rx == "ascii") ? "^^ " : ""; 
+    // determine the indicator before each message
+    const msg_indicators = { tx: "=>", rx: "<=", ascii: "^^", grip: "g<", none: "  " };
+    tx_rx = tx_rx.toLowerCase();
+    if (tx_rx in msg_indicators)
+    {
+        var tx_rx_indicator = msg_indicators[tx_rx];
+    } else {
+        var tx_rx_indicator = msg_indicators["none"];
+    }
     let val_str = "";
 
     // if it's a HexStr, convert it to a msg
@@ -360,7 +367,7 @@ async function subscribeToCharacteristics() {
         console_element.innerHTML = console_element.innerHTML.slice(-10000);
     }
     // write the message to the Command Terminal component
-    console_element.innerHTML += getTimestampStr() + " " + tx_rx_indicator + val_str + "<br>";
+    console_element.innerHTML += getTimestampStr() + " " + tx_rx_indicator + " " + val_str + "<br>";
 
     // scroll to the bottom of the terminal
     let response_label_div = document.getElementById("cmd_responses_terminal");
