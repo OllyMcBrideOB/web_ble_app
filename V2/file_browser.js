@@ -229,21 +229,24 @@ class FileBrowser {
     async #onDeleteClick(event) {
         const parent = event.currentTarget.parentNode;
 
-        // re-entrant function to get the contents of a directory & any subdirectories
-        const removeChildren = async (file) => {
-            // if the file is a directory
-            if (this.#isDir(file.type)) {
-                for (let c of file.child) {
-                    await removeChildren(c);
-                }
-            }
-            parent.remove();
-        }
+        // // re-entrant function to get the contents of a directory & any subdirectories
+        // const removeChildren = async (file) => {
+        //     // if the file is a directory
+        //     if (this.#isDir(file.type)) {
+        //         for (let c of file.child) {
+        //             await removeChildren(c);
+        //         }
+        //     }
+        //     parent.remove();
+        // }
 
         const f = new FileTransfer();
         const file_status = await f.remove(parent.value.path + "/" + parent.value.filename);
         if (fileStatusToString(file_status) == "SUCCESS") {
-            removeChildren(parent.child)
+            // if the file is a directory
+            // if (this.#isDir(parent.value.type)) {
+            //     removeChildren(parent.child)
+            // }
             parent.remove();
             // TODO, recursively remove all children
         }
