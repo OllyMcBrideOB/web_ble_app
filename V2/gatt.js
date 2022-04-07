@@ -15,7 +15,8 @@ class GATTmanager {
                 addCharacteristic("NRTLargeResponse", new OB_UUID("2019"));
 
         this.addService("RTservice", new OB_UUID("1008")).
-                addCharacteristic("RTButtonStatus", new OB_UUID("201a"));
+                addCharacteristic("RTButtonStatus", new OB_UUID("201a")).
+                addCharacteristic("RTGripData", new OB_UUID("201c"));
 
 
         // generate the connection options
