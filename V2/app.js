@@ -449,8 +449,10 @@ function loadAndViewFile(file) {
     if (file_data.length == 0) {
         fm_viewer.innerHTML = " - Empty file - ";
     } else if (isTextFile(file_extension)) {
-        fm_viewer.innerHTML = file_data_hex_str.toUTF8String().replaceAll("\n", "<br>");
+        fm_viewer.style.whiteSpace="pre";
+        fm_viewer.innerHTML = file_data_hex_str.toUTF8String();
     } else {
+        fm_viewer.style.whiteSpace="normal";
         fm_viewer.innerHTML = file_data_hex_str.toString("-").toUpperCase();
     }
 
