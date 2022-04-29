@@ -190,7 +190,7 @@ class GATTcharacteristic extends GATTitem {
         // else if we're not currently connected to a BLE peripheral
         else
         {
-            console.log("ERROR - Unable to write val to the '%s' characteristic as we are not connected to a BLE device", this.name);
+            console.log("ERROR - Unable to read from the '%s' characteristic as we are not connected to a BLE device", this.name);
         }
     }
 
@@ -249,7 +249,7 @@ class GATTcharacteristic extends GATTitem {
         // else if we're not currently connected to a BLE peripheral
         else
         {
-            console.log("ERROR - Unable to write val to the '%s' characteristic as we are not connected to a BLE device", this.name);
+            console.log("ERROR - Unable to subscribe to the '%s' characteristic as we are not connected to a BLE device", this.name);
         }
     }
     
