@@ -53,6 +53,46 @@
         </div>
     </fieldset>
 
+    <fieldset id="card_grip" class="card">
+        <legend>Grips</legend>
+        <div id="grip_cmds">
+            <button id="btn_delete_grips">Delete Grips</button>
+            <button id="btn_save_grips">Save Grips</button>
+        </div>
+        <fieldset id="all_grips"> 
+            <legend>Grip Creator</legend>
+            <div id="grip_group_nums">
+                <label>Group:</label>
+                <input type="text" id="grip_cmd_group_num" class="one_digit_field" value="0">
+                <label>Grip:</label>
+                <input type="text" id="grip_cmd_grip_num" class="one_digit_field" value="0">
+                <button id="btn_reset_grip_group_num">Reset</button>
+            </div>
+            <div id="grip_group_nums">
+                <button id="btn_fist">Fist</button>
+                <button id="btn_hook">Hook</button>
+                <button id="btn_tripod_fop">Tripod FOP</button>
+                <button id="btn_tripod_fcl">Tripod FCL</button>
+                <button id="btn_pinch_fop">Pinch FOP</button>
+                <button id="btn_pinch_fcl">Pinch FCL</button>
+            </div>
+            <div id="grip_cmd_builder">
+                <div id="grip_cmd_box" class="scroll_box">
+                    <label id="label_grip_cmd"></label>
+                </div>
+                <div>
+                    <button id="btn_send_grip_cmd">Send</button>
+                    <button id="btn_clear_grip_cmd">Clear</button>
+                </div>
+                <div>
+                    <label>Size:</label>
+                    <label id="label_grip_len_bytes">--</label>
+                    <label> bytes</label>
+                </div>
+            </div>
+        </fieldset>
+    </fieldset>
+
     <fieldset id="card_file_manager" class="card">
         <legend>File Manager</legend>
         <div id="fm_header">
@@ -116,6 +156,7 @@
 <script src="messages.js"></script>
 <script src="file_transfer.js"></script>
 <script src="file_browser.js"></script>
+<script src="grip_management.js"></script>
 <script src="app.js"></script>
 
 </html>

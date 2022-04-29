@@ -23,6 +23,10 @@ legend {
    -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+.one_digit_field {
+    width: 8px;
+}
+
 
 /* Header */
 
@@ -171,6 +175,8 @@ header label {
 #fm_viewer {
     width: 70%;
     height: 300px;
+    word-break: break-word;
+    white-space: normal;
 }
 
 #fm_file_info {
@@ -217,3 +223,31 @@ header label {
     width: 35%;
     text-align: right;
 }
+
+/* Grip Manager */
+
+#card_grip {
+    padding: 10px;
+    position: absolute;
+    top: 78px;
+    left: 750px;
+    min-width: 800px;
+}
+
+#grip_cmds {
+    padding: 10px;
+}
+
+#grip_group_nums {
+    padding-bottom: 10px;
+}
+
+#grip_btns {
+    padding: 10px;
+}
+
+#label_grip_cmd {
+    word-wrap: break-word;
+    max-width: 100px;
+}
+
