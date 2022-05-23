@@ -279,7 +279,17 @@ function onDisconnect(event) {
  *  Called after successful connection. Allows characteristics to be subscribed to
  */
 async function subscribeToCharacteristics() {
-   
+    // display the unprotected Pairing/Bonded state
+    console.log("subscribing to PairBondStatus");
+    GATT.GATTtable.NRTservice.PairBondStatus.onValueChange( event => { 
+        updatePairBondStatus(event.target.value.getUint8(0));
+    })
+    
+    console.log("reading PairBondStatus");
+    GATT.GATTtable.NRTservice.PairBondStatus.read().then( rx_val => {      
+        updatePairBondStatus(rx_val.getUint8(0));
+    })
+
     // subscribe to the NRT response char
     GATT.GATTtable.NRTservice.NRTResponse.onValueChange( function(event) {      
         // convert the ArrayBuffer to a HexStr
@@ -325,8 +335,29 @@ async function subscribeToCharacteristics() {
         {
             document.getElementById("label_bootloader").innerHTML = response_msg.payload.toUTF8String();
         })
-    })
+    })    
 };
+
+/**
+ * Display the Pairing/Bonding state
+ * @param {uint8_t} status_enum Pairing/Bonding status
+ */
+function updatePairBondStatus(status_enum) {
+    const status_str = {
+        0x00        : "NONE",              
+        0x01        : "CONNECTED",        
+        0x02        : "PAIRED_BONDED",       
+        0xDE        : "DELETE_BOND",    
+    }
+    try {
+        var s = status_str[status_enum];
+    } catch(e) {
+        var s =  "Unknown (" + file_status + ")";
+    }
+
+    console.log("PairBondStatus: " + s);
+    document.getElementById("label_pair_status").innerHTML = s;
+}
 
 /**
  * Write a message to the command terminal (including the rx/tx indicator)

@@ -12,7 +12,8 @@ class GATTmanager {
                 addCharacteristic("NRTRequest", new OB_UUID("2017")).
                 addCharacteristic("NRTResponse", new OB_UUID("2018")).
                 addCharacteristic("NRTLargeRequest", new OB_UUID("201e")).
-                addCharacteristic("NRTLargeResponse", new OB_UUID("2019"));
+                addCharacteristic("NRTLargeResponse", new OB_UUID("2019")).
+                addCharacteristic("PairBondStatus", new OB_UUID("201F"));
 
         this.addService("RTservice", new OB_UUID("1008")).
                 addCharacteristic("RTButtonStatus", new OB_UUID("201a")).
@@ -182,9 +183,10 @@ class GATTservice extends GATTitem {
 
 class GATTcharacteristic extends GATTitem {
     /*< Read the current value of the characteristic */
-    read() {
+    async read() {
         if (this.gatt_manager.isConnected())
         {
+            return this.handle.readValue();
             // TODO, read the current value of the characteristic
         }
         // else if we're not currently connected to a BLE peripheral
